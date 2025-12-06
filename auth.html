@@ -1,0 +1,571 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>FinexaLoans - Sign In / Sign Up</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            colors: {
+              background: "hsl(var(--background))",
+              foreground: "hsl(var(--foreground))",
+              card: "hsl(var(--card))",
+              border: "hsl(var(--border))",
+              secondary: "hsl(var(--secondary))",
+              muted: "hsl(var(--muted))",
+              "muted-foreground": "hsl(var(--muted-foreground))",
+              destructive: "hsl(var(--destructive))",
+              success: "hsl(var(--success))",
+              warning: "hsl(var(--warning))",
+              primary: "hsl(var(--primary))",
+              "primary-foreground": "hsl(var(--primary-foreground))",
+            },
+            borderRadius: {
+              lg: "var(--radius)",
+              md: "calc(var(--radius) - 2px)",
+              sm: "calc(var(--radius) - 4px)",
+            },
+            animation: {
+              "fade-in": "fade-in 0.4s ease-out forwards",
+            },
+            keyframes: {
+              "fade-in": {
+                "0%": { opacity: "0" },
+                "100%": { opacity: "1" },
+              },
+            },
+          },
+        },
+      };
+    </script>
+    <style>
+      /* BASE LAYER from stylesheet */
+      :root {
+        --background: 0 0% 0%;
+        --foreground: 0 0% 100%;
+        --card: 0 0% 4%;
+        --card-foreground: 0 0% 100%;
+        --primary: 0 0% 100%;
+        --primary-foreground: 0 0% 0%;
+        --secondary: 0 0% 10%;
+        --secondary-foreground: 0 0% 100%;
+        --muted: 0 0% 15%;
+        --muted-foreground: 0 0% 65%;
+        --destructive: 0 62% 50%;
+        --success: 142 76% 45%;
+        --warning: 45 93% 55%;
+        --border: 0 0% 15%;
+        --input: 0 0% 15%;
+        --radius: 0.75rem;
+      }
+
+      /* FONT from stylesheet */
+      @import url("https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap");
+      body {
+        font-family: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI",
+          sans-serif;
+      }
+
+      /* New style for inputs to match the desired look: white/5 background, rounded-xl, subtle border */
+      .custom-input {
+        background-color: rgba(255, 255, 255, 0.05); /* bg-white/5 */
+        border: 1px solid rgba(255, 255, 255, 0.1); /* border-white/10 */
+        border-radius: 0.75rem; /* rounded-xl */
+        padding: 0.75rem 1rem; /* px-4 py-3 */
+        width: 100%;
+        transition: border-color 150ms;
+      }
+      .custom-input:focus {
+        outline: none;
+        border-color: rgba(255, 255, 255, 0.3); /* focus:border-white/30 */
+      }
+      .custom-input.input-error {
+        border-color: hsl(var(--destructive)); /* border-red-500 */
+      }
+    </style>
+  </head>
+  <body class="bg-background text-foreground min-h-screen">
+    <div
+      id="toast-container"
+      class="fixed top-4 right-4 z-[100] space-y-2"
+    ></div>
+
+    <div
+      class="min-h-screen bg-background flex items-center justify-center p-6"
+    >
+      <div class="w-full max-w-md">
+        <button
+          id="back-button"
+          class="inline-flex items-center gap-2 text-muted-foreground hover:text-foreground mb-8 transition-colors"
+        >
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            width="24"
+            height="24"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            class="lucide lucide-arrow-left h-4 w-4"
+          >
+            <path d="m12 19-7-7 7-7"></path>
+            <path d="M19 12H5"></path>
+          </svg>
+          Back
+        </button>
+
+        <div class="mb-12">
+          <h1 id="main-title" class="text-4xl sm:text-5xl tracking-tight mb-3">
+            Welcome back.
+          </h1>
+          <p id="auth-subtitle" class="text-muted-foreground">
+            Sign in to your account
+          </p>
+        </div>
+
+        <form id="auth-form" class="space-y-6">
+          <div id="signup-fields" class="space-y-6" style="display: none">
+            <div class="grid grid-cols-2 gap-4">
+              <div>
+                <label
+                  class="block text-sm text-muted-foreground mb-2"
+                  for="FirstName"
+                  >First Name</label
+                >
+                <input
+                  type="text"
+                  id="FirstName"
+                  class="custom-input"
+                  placeholder="John"
+                />
+                <p
+                  id="error-FirstName"
+                  class="text-sm text-destructive mt-1 hidden"
+                ></p>
+              </div>
+              <div>
+                <label
+                  class="block text-sm text-muted-foreground mb-2"
+                  for="LastName"
+                  >Last Name</label
+                >
+                <input
+                  type="text"
+                  id="LastName"
+                  class="custom-input"
+                  placeholder="Cena"
+                />
+                <p
+                  id="error-LastName"
+                  class="text-sm text-destructive mt-1 hidden"
+                ></p>
+              </div>
+            </div>
+
+            <div class="grid grid-cols-2 gap-4">
+              <div>
+                <label
+                  class="block text-sm text-muted-foreground mb-2"
+                  for="DateOfBirth"
+                  >Date of Birth</label
+                >
+                <input type="date" id="DateOfBirth" class="custom-input" />
+                <p
+                  id="error-DateOfBirth"
+                  class="text-sm text-destructive mt-1 hidden"
+                ></p>
+              </div>
+              <div>
+                <label
+                  class="block text-sm text-muted-foreground mb-2"
+                  for="PhoneNumber"
+                  >Phone Number</label
+                >
+                <input
+                  type="tel"
+                  id="PhoneNumber"
+                  class="custom-input"
+                  placeholder="+234 123 456 7890"
+                />
+                <p
+                  id="error-PhoneNumber"
+                  class="text-sm text-destructive mt-1 hidden"
+                ></p>
+              </div>
+            </div>
+
+            <div>
+              <label
+                class="block text-sm text-muted-foreground mb-2"
+                for="Occupation"
+                >Occupation</label
+              >
+              <input
+                type="text"
+                id="Occupation"
+                class="custom-input"
+                placeholder="Lecturer"
+              />
+              <p
+                id="error-Occupation"
+                class="text-sm text-destructive mt-1 hidden"
+              ></p>
+            </div>
+
+            <div>
+              <label
+                class="block text-sm text-muted-foreground mb-2"
+                for="Address"
+                >Address</label
+              >
+              <input
+                type="text"
+                id="Address"
+                class="custom-input"
+                placeholder="Babcock University, Ilishan-Remo"
+              />
+              <p
+                id="error-Address"
+                class="text-sm text-destructive mt-1 hidden"
+              ></p>
+            </div>
+
+            <div class="grid grid-cols-2 gap-4">
+              <div>
+                <label
+                  class="block text-sm text-muted-foreground mb-2"
+                  for="NIN"
+                  >NIN</label
+                >
+                <input
+                  type="text"
+                  id="NIN"
+                  class="custom-input"
+                  placeholder="12345678901"
+                  maxlength="11"
+                  oninput="this.value = this.value.replace(/\D/g, '')"
+                />
+                <p
+                  id="error-NIN"
+                  class="text-sm text-destructive mt-1 hidden"
+                ></p>
+              </div>
+              <div>
+                <label
+                  class="block text-sm text-muted-foreground mb-2"
+                  for="BVN"
+                  >BVN</label
+                >
+                <input
+                  type="text"
+                  id="BVN"
+                  class="custom-input"
+                  placeholder="22123456789"
+                  maxlength="11"
+                  oninput="this.value = this.value.replace(/\D/g, '')"
+                />
+                <p
+                  id="error-BVN"
+                  class="text-sm text-destructive mt-1 hidden"
+                ></p>
+              </div>
+            </div>
+          </div>
+          <div>
+            <label class="block text-sm text-muted-foreground mb-2" for="Email"
+              >Email</label
+            >
+            <input
+              type="email"
+              id="Email"
+              class="custom-input"
+              placeholder="you@example.com"
+            />
+            <p
+              id="error-Email"
+              class="text-sm text-destructive mt-1 hidden"
+            ></p>
+          </div>
+
+          <div id="password-container">
+            <label
+              class="block text-sm text-muted-foreground mb-2"
+              for="Password"
+              >Password</label
+            >
+            <input
+              type="password"
+              id="Password"
+              class="custom-input"
+              placeholder="••••••••"
+            />
+            <p
+              id="error-Password"
+              class="text-sm text-destructive mt-1 hidden"
+            ></p>
+          </div>
+          <button
+            type="submit"
+            id="auth-submit-button"
+            class="w-full bg-primary text-primary-foreground py-3 rounded-full hover:bg-primary/90 transition-colors text-base font-semibold disabled:opacity-50"
+          >
+            Sign in
+          </button>
+        </form>
+
+        <div class="mt-6 text-center">
+          <button
+            id="switch-mode-button"
+            class="text-sm text-muted-foreground hover:text-foreground transition-colors"
+          >
+            Don't have an account? Sign up
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <script>
+      // State and Elements
+      let isLogin = true;
+      const initialFormState = {
+        FirstName: "",
+        LastName: "",
+        Email: "",
+        DateOfBirth: "",
+        PhoneNumber: "",
+        Occupation: "",
+        Address: "",
+        NIN: "",
+        BVN: "",
+        Password: "",
+      };
+      let formData = { ...initialFormState };
+      let errors = {};
+
+      const formEl = document.getElementById("auth-form");
+      const signupFieldsEl = document.getElementById("signup-fields");
+      const backButtonEl = document.getElementById("back-button");
+      const switchModeButtonEl = document.getElementById("switch-mode-button");
+      const submitButtonEl = document.getElementById("auth-submit-button");
+      const mainTitleEl = document.getElementById("main-title");
+      const subtitleEl = document.getElementById("auth-subtitle");
+
+      const urlParams = new URLSearchParams(window.location.search);
+      const initialMode = urlParams.get("mode");
+
+      // --- Utility Functions ---
+
+      function getInputValue(field) {
+        return document.getElementById(field).value.trim();
+      }
+
+      function updateErrorDisplay(field, message) {
+        const inputEl = document.getElementById(field);
+        const errorEl = document.getElementById(`error-${field}`);
+
+        if (message) {
+          inputEl.classList.add("input-error");
+          errorEl.textContent = message;
+          errorEl.classList.remove("hidden");
+        } else {
+          inputEl.classList.remove("input-error");
+          errorEl.classList.add("hidden");
+        }
+      }
+
+      function clearErrors() {
+        Object.keys(errors).forEach((field) => updateErrorDisplay(field, ""));
+        errors = {};
+      }
+
+      function showToast(message, type = "success") {
+        const container = document.getElementById("toast-container");
+        const toast = document.createElement("div");
+
+        let colorClass = "bg-success text-white";
+        if (type === "error") colorClass = "bg-destructive text-white";
+        if (type === "warning")
+          colorClass = "bg-warning text-warning-foreground";
+
+        toast.className = `p-4 rounded-xl shadow-lg font-medium max-w-xs ${colorClass}`;
+        toast.textContent = message;
+
+        container.appendChild(toast);
+
+        setTimeout(() => {
+          toast.classList.add(
+            "transition-opacity",
+            "duration-500",
+            "opacity-0"
+          );
+          toast.addEventListener("transitionend", () => toast.remove());
+        }, 3000);
+      }
+
+      function setButtonLoading(button, isLoading, originalText) {
+        button.disabled = isLoading;
+        button.textContent = isLoading
+          ? isLogin
+            ? "Signing in..."
+            : "Creating account..."
+          : originalText;
+        button.classList.toggle("opacity-50", isLoading);
+      }
+
+      // --- Validation Logic (Modeled after React Component) ---
+
+      function validateSignup() {
+        const newErrors = {};
+
+        // Sync formData with current input values
+        Object.keys(formData).forEach(
+          (key) => (formData[key] = getInputValue(key))
+        );
+
+        if (!formData.FirstName) newErrors.FirstName = "First name is required";
+        if (!formData.LastName) newErrors.LastName = "Last name is required";
+        if (!formData.Email) {
+          newErrors.Email = "Email is required";
+        } else if (!/\S+@\S+\.\S+/.test(formData.Email)) {
+          newErrors.Email = "Email is invalid";
+        }
+        if (!formData.DateOfBirth)
+          newErrors.DateOfBirth = "Date of birth is required";
+        if (!formData.PhoneNumber)
+          newErrors.PhoneNumber = "Phone number is required";
+        if (!formData.Occupation)
+          newErrors.Occupation = "Occupation is required";
+        if (!formData.Address) newErrors.Address = "Address is required";
+        if (!formData.NIN || formData.NIN.length !== 11)
+          newErrors.NIN = "NIN must be 11 digits";
+        if (!formData.BVN || formData.BVN.length !== 11)
+          newErrors.BVN = "BVN must be 11 digits";
+        if (!formData.Password) {
+          newErrors.Password = "Password is required";
+        } else if (formData.Password.length < 8) {
+          newErrors.Password = "Password must be at least 8 characters";
+        }
+
+        errors = newErrors;
+        Object.keys(initialFormState).forEach((field) =>
+          updateErrorDisplay(field, errors[field])
+        );
+        return Object.keys(errors).length === 0;
+      }
+
+      function validateLogin() {
+        const newErrors = {};
+
+        // Sync formData for Email/Password
+        formData.Email = getInputValue("Email");
+        formData.Password = getInputValue("Password");
+
+        if (!formData.Email) newErrors.Email = "Email is required";
+        if (!formData.Password) newErrors.Password = "Password is required";
+
+        errors = newErrors;
+        updateErrorDisplay("Email", errors.Email);
+        updateErrorDisplay("Password", errors.Password);
+        return Object.keys(errors).length === 0;
+      }
+
+      // --- Mode Management ---
+
+      function syncFormInputsToState() {
+        // This updates the JS state (formData) when the user types, and clears errors
+        const inputs = formEl.querySelectorAll("input");
+        inputs.forEach((input) => {
+          const field = input.id;
+          if (formData.hasOwnProperty(field)) {
+            formData[field] = input.value.trim();
+            if (errors[field]) {
+              updateErrorDisplay(field, "");
+            }
+          }
+        });
+        errors = {}; // Clear all JS errors when any input changes
+      }
+
+      function renderMode() {
+        if (isLogin) {
+          mainTitleEl.textContent = "Welcome back.";
+          subtitleEl.textContent = "Sign in to your account";
+          submitButtonEl.textContent = "Sign in";
+          switchModeButtonEl.textContent = "Don't have an account? Sign up";
+          signupFieldsEl.style.display = "none";
+        } else {
+          mainTitleEl.textContent = "Get started.";
+          subtitleEl.textContent = "Create your account";
+          submitButtonEl.textContent = "Create account";
+          switchModeButtonEl.textContent = "Already have an account? Sign in";
+          signupFieldsEl.style.display = "block";
+        }
+        // Clear form and errors on mode switch
+        formEl.reset();
+        formData = { ...initialFormState };
+        clearErrors();
+      }
+
+      function switchMode() {
+        isLogin = !isLogin;
+        renderMode();
+      }
+
+      // --- Main Logic & Handlers ---
+
+      function handleSubmit(e) {
+        e.preventDefault();
+
+        let isValid = false;
+        clearErrors();
+
+        if (isLogin) {
+          isValid = validateLogin();
+        } else {
+          isValid = validateSignup();
+        }
+
+        if (isValid) {
+          setButtonLoading(submitButtonEl, true);
+
+          // Simulate API call and navigation
+          setTimeout(
+            () => {
+              setButtonLoading(submitButtonEl, false);
+              showToast(
+                isLogin ? "Welcome back!" : "Account created successfully!",
+                "success"
+              );
+              localStorage.setItem("isAuthenticated", "true");
+              window.location.href = "dashboard.html";
+            },
+            isLogin ? 1000 : 1500
+          );
+        }
+      }
+
+      // --- Initialization ---
+      document.addEventListener("DOMContentLoaded", () => {
+        // Set initial mode based on URL query
+        if (initialMode === "signup") {
+          isLogin = false;
+        }
+        renderMode();
+
+        // Event Listeners
+        formEl.addEventListener("submit", handleSubmit);
+        formEl.addEventListener("input", syncFormInputsToState);
+        switchModeButtonEl.addEventListener("click", switchMode);
+        backButtonEl.addEventListener("click", () => {
+          window.location.href = "index.html";
+        });
+      });
+    </script>
+  </body>
+</html>

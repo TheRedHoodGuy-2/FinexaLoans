@@ -1,0 +1,1118 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>FinexaLoans - Dashboard</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            colors: {
+              background: "hsl(var(--background))",
+              foreground: "hsl(var(--foreground))",
+              card: "hsl(var(--card))",
+              border: "hsl(var(--border))",
+              secondary: "hsl(var(--secondary))",
+              muted: "hsl(var(--muted))",
+              "muted-foreground": "hsl(var(--muted-foreground))",
+              destructive: "hsl(var(--destructive))",
+              success: "hsl(var(--success))",
+              warning: "hsl(var(--warning))",
+              primary: "hsl(var(--primary))",
+              "primary-foreground": "hsl(var(--primary-foreground))",
+              "warning-foreground": "hsl(var(--warning-foreground))",
+              // ADDED INFO COLOR FOR PENDING/IN-PROGRESS (Blueish)
+              info: "hsl(210 90% 50%)",
+            },
+            borderRadius: {
+              lg: "var(--radius)",
+              md: "calc(var(--radius) - 2px)",
+              sm: "calc(var(--radius) - 4px)",
+            },
+            animation: {
+              "fade-in": "fade-in 0.4s ease-out forwards",
+            },
+            keyframes: {
+              "fade-in": {
+                "0%": { opacity: "0" },
+                "100%": { opacity: "1" },
+              },
+            },
+          },
+        },
+      };
+    </script>
+    <style>
+      /* BASE LAYER from stylesheet */
+      :root {
+        --background: 0 0% 0%;
+        --foreground: 0 0% 100%;
+        --card: 0 0% 4%;
+        --card-foreground: 0 0% 100%;
+        --primary: 0 0% 100%;
+        --primary-foreground: 0 0% 0%;
+        --secondary: 0 0% 10%;
+        --secondary-foreground: 0 0% 100%;
+        --muted: 0 0% 15%;
+        --muted-foreground: 0 0% 65%;
+        --destructive: 0 62% 50%;
+        --success: 142 76% 45%;
+        --warning: 45 93% 55%;
+        --warning-foreground: 0 0% 0%; /* Black text on yellow */
+        --border: 0 0% 15%;
+        --input: 0 0% 15%;
+        --radius: 0.75rem;
+      }
+
+      /* FONT from stylesheet */
+      @import url("https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap");
+      body {
+        font-family: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI",
+          sans-serif;
+      }
+
+      /* UTILITIES from stylesheet (applied via custom classes in HTML) */
+      .glass-hover {
+        transition-property: all;
+        transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
+        transition-duration: 300ms;
+        background-color: hsl(var(--card) / 0.7);
+        border-color: hsl(var(--border) / 1);
+      }
+
+      /* MODERN TOAST STYLES (Mimicking provided image) */
+      .toast-pill {
+        background: hsl(var(--card));
+        border-radius: 12px;
+        box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.2),
+          0 4px 6px -2px rgba(0, 0, 0, 0.05);
+        color: hsl(var(--foreground));
+        transition: transform 0.3s ease-out, opacity 0.3s ease-out;
+      }
+      .icon-border {
+        border-radius: 9999px; /* rounded-full */
+        padding: 2px;
+        border: 1px solid currentColor;
+      }
+
+      .loan-card-clickable {
+        cursor: pointer;
+      }
+    </style>
+  </head>
+  <body class="bg-background text-foreground min-h-screen">
+    <div
+      id="toast-container"
+      class="fixed top-4 right-4 z-[100] space-y-2"
+    ></div>
+
+    <div id="root"></div>
+
+    <div id="modals-container">
+      <div
+        id="new-loan-modal"
+        class="fixed inset-0 z-50 items-center justify-center p-4 hidden"
+      >
+        <div
+          class="absolute inset-0 bg-background/80 backdrop-blur-sm"
+          onclick="closeNewLoanModal()"
+        ></div>
+        <div
+          class="relative w-full max-w-md rounded-2xl border border-border/30 bg-card p-6 animate-fade-in"
+        >
+          <div class="flex items-center justify-between mb-6">
+            <h2 class="text-xl font-semibold">Apply for a Loan</h2>
+            <button
+              onclick="closeNewLoanModal()"
+              class="p-2 rounded-lg hover:bg-secondary transition-colors"
+            >
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                width="24"
+                height="24"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                class="lucide lucide-x h-5 w-5"
+              >
+                <path d="M18 6 6 18"></path>
+                <path d="m6 6 12 12"></path>
+              </svg>
+            </button>
+          </div>
+
+          <form id="new-loan-form" class="space-y-5">
+            <div class="space-y-2">
+              <label>Loan Type</label>
+              <select
+                id="loan-type"
+                class="flex w-full rounded-md border px-3 py-2 text-base h-12 bg-secondary/70 border-border focus:outline-none focus:ring-2 focus:ring-offset-2"
+              >
+                <option value="">Select loan type</option>
+                <option value="Personal">Personal</option>
+                <option value="Business">Business</option>
+                <option value="Mortgage">Mortgage</option>
+                <option value="Auto">Auto</option>
+                <option value="Education">Education</option>
+              </select>
+              <p
+                id="error-loanType"
+                class="text-sm text-destructive hidden"
+              ></p>
+            </div>
+
+            <div class="space-y-2">
+              <label for="amount">Amount (₦)</label>
+              <input
+                id="amount"
+                type="number"
+                placeholder="500000"
+                class="flex w-full rounded-md border px-3 py-2 text-base h-12 bg-secondary/70 border-border focus:outline-none focus:ring-2 focus:ring-offset-2"
+              />
+              <p id="error-amount" class="text-sm text-destructive hidden"></p>
+            </div>
+
+            <div class="space-y-2">
+              <label for="duration">Duration (Months)</label>
+              <input
+                id="duration"
+                type="number"
+                placeholder="12"
+                class="flex w-full rounded-md border px-3 py-2 text-base h-12 bg-secondary/70 border-border focus:outline-none focus:ring-2 focus:ring-offset-2"
+              />
+              <p
+                id="error-durationMonths"
+                class="text-sm text-destructive hidden"
+              ></p>
+            </div>
+
+            <div class="space-y-2">
+              <label for="collateral">Collateral (Optional)</label>
+              <input
+                id="collateral"
+                placeholder="e.g., Vehicle Title, Property Deed"
+                class="flex w-full rounded-md border px-3 py-2 text-base h-12 bg-secondary/70 border-border focus:outline-none focus:ring-2 focus:ring-offset-2"
+              />
+            </div>
+
+            <button
+              type="submit"
+              class="w-full h-12 bg-primary text-primary-foreground hover:bg-primary/90 inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
+            >
+              Submit Application
+            </button>
+          </form>
+        </div>
+      </div>
+
+      <div
+        id="payment-modal"
+        class="fixed inset-0 z-50 items-center justify-center p-4 hidden"
+      >
+        <div
+          class="absolute inset-0 bg-background/80 backdrop-blur-sm"
+          onclick="closePaymentModal()"
+        ></div>
+        <div
+          class="relative w-full max-w-md rounded-2xl border border-border/30 bg-card p-6 animate-fade-in"
+        >
+          <div class="flex items-center justify-between mb-6">
+            <h2 class="text-xl font-semibold">Make a Payment</h2>
+            <button
+              onclick="closePaymentModal()"
+              class="p-2 rounded-lg hover:bg-secondary transition-colors"
+            >
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                width="24"
+                height="24"
+                viewbox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                class="lucide lucide-x h-5 w-5"
+              >
+                <path d="M18 6 6 18"></path>
+                <path d="m6 6 12 12"></path>
+              </svg>
+            </button>
+          </div>
+
+          <div id="no-loans-message" class="text-center py-8 hidden">
+            <p class="text-muted-foreground">No active loans to pay</p>
+          </div>
+
+          <form id="payment-form" class="space-y-5 hidden">
+            <div class="space-y-2">
+              <label>Select Loan</label>
+              <select
+                id="payment-loan-select"
+                class="flex w-full rounded-md border px-3 py-2 text-base h-12 bg-secondary/70 border-border focus:outline-none focus:ring-2 focus:ring-offset-2"
+              >
+                <option value="">Choose a loan</option>
+              </select>
+            </div>
+
+            <div
+              id="loan-details"
+              class="p-4 rounded-xl bg-secondary/50 border border-border/30 hidden"
+            >
+              <div class="flex justify-between items-center mb-2">
+                <span class="text-sm text-muted-foreground"
+                  >Outstanding Balance</span
+                >
+                <span id="loan-balance" class="font-semibold"></span>
+              </div>
+              <div class="flex justify-between items-center">
+                <span class="text-sm text-muted-foreground">Interest Rate</span>
+                <span id="loan-interest" class="font-medium"></span>
+              </div>
+            </div>
+
+            <div class="space-y-2">
+              <label for="payment-amount">Payment Amount (₦)</label>
+              <input
+                id="payment-amount"
+                type="number"
+                placeholder="Enter amount"
+                class="flex w-full rounded-md border px-3 py-2 text-base h-12 bg-secondary/70 border-border focus:outline-none focus:ring-2 focus:ring-offset-2"
+              />
+              <p id="error-payment" class="text-sm text-destructive hidden"></p>
+            </div>
+
+            <button
+              type="submit"
+              class="w-full h-12 bg-primary text-primary-foreground hover:bg-primary/90 inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
+            >
+              Confirm Payment
+            </button>
+          </form>
+        </div>
+      </div>
+
+      <div
+        id="loan-details-modal"
+        class="fixed inset-0 z-50 items-center justify-center p-4 hidden"
+      >
+        <div
+          class="absolute inset-0 bg-background/80 backdrop-blur-sm"
+          onclick="closeLoanDetailsModal()"
+        ></div>
+        <div
+          class="relative w-full max-w-md rounded-2xl border border-border/30 bg-card p-6 animate-fade-in"
+        >
+          <div class="flex items-center justify-between mb-6">
+            <h2 id="modal-loan-type" class="text-xl font-semibold">
+              Loan Details
+            </h2>
+            <button
+              onclick="closeLoanDetailsModal()"
+              class="p-2 rounded-lg hover:bg-secondary transition-colors"
+            >
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                width="24"
+                height="24"
+                viewbox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                class="lucide lucide-x h-5 w-5"
+              >
+                <path d="M18 6 6 18"></path>
+                <path d="m6 6 12 12"></path>
+              </svg>
+            </button>
+          </div>
+
+          <div id="modal-content" class="space-y-4">
+            <div
+              class="p-4 rounded-xl bg-secondary/50 border border-border/30"
+              id="modal-status-card"
+            >
+              <div class="flex justify-between items-center mb-2">
+                <span class="text-sm text-muted-foreground"
+                  >Current Status</span
+                >
+                <span
+                  id="modal-status"
+                  class="font-semibold px-3 py-1 rounded-full text-xs"
+                ></span>
+              </div>
+              <div class="flex justify-between items-center">
+                <span class="text-sm text-muted-foreground"
+                  >Outstanding Balance</span
+                >
+                <span id="modal-amount" class="font-bold text-lg"></span>
+              </div>
+            </div>
+
+            <div class="space-y-2">
+              <h4 class="font-semibold text-muted-foreground">
+                Key Information
+              </h4>
+              <div
+                class="text-sm space-y-2 border border-secondary p-3 rounded-lg"
+              >
+                <div class="flex justify-between items-center">
+                  <span class="text-muted-foreground">Rate:</span>
+                  <span id="modal-rate"></span>
+                </div>
+                <div class="flex justify-between items-center">
+                  <span class="text-muted-foreground">Duration:</span>
+                  <span id="modal-duration"></span>
+                </div>
+                <div class="flex justify-between items-center">
+                  <span class="text-muted-foreground">Collateral:</span>
+                  <span id="modal-collateral"></span>
+                </div>
+              </div>
+            </div>
+
+            <div class="space-y-2">
+              <h4 class="font-semibold text-muted-foreground">Dates</h4>
+              <div
+                class="text-sm space-y-2 border border-secondary p-3 rounded-lg"
+              >
+                <div class="flex justify-between items-center">
+                  <span class="text-muted-foreground">Application Date:</span>
+                  <span id="modal-created-at"></span>
+                </div>
+                <div class="flex justify-between items-center">
+                  <span class="text-muted-foreground">Approval Date:</span>
+                  <span id="modal-approved-at"></span>
+                </div>
+                <div class="flex justify-between items-center">
+                  <span class="text-muted-foreground">Due Date:</span>
+                  <span id="modal-due-date" class="font-semibold"></span>
+                </div>
+              </div>
+            </div>
+
+            <button
+              id="modal-pay-button"
+              class="w-full h-12 bg-primary text-primary-foreground hover:bg-primary/90 inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
+            >
+              Make Payment
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <script>
+      // --- DATA & UTILITIES ---
+      const LOAN_TYPES = [
+        "Personal",
+        "Business",
+        "Mortgage",
+        "Auto",
+        "Education",
+      ];
+      const INTEREST_RATES = {
+        Personal: 12.5,
+        Business: 15.0,
+        Mortgage: 8.5,
+        Auto: 10.0,
+        Education: 8.0,
+      };
+
+      const dummyLoans = [
+        {
+          id: "loan-1",
+          userId: "user-1",
+          loanType: "Personal",
+          amount: 500000,
+          interestRate: 12.5,
+          durationMonths: 12, // Approved Jan 1, due Jan 1 next year (Active and Past Due simulation)
+          collateral: "None",
+          status: "Active",
+          createdAt: "2024-01-01",
+          approvedAt: "2024-01-01",
+        },
+        {
+          id: "loan-2",
+          userId: "user-1",
+          loanType: "Business",
+          amount: 2000000,
+          interestRate: 15.0,
+          durationMonths: 24, // Approved Mar 16, due Mar 16 two years later (Active, NOT Past Due)
+          collateral: "Equipment",
+          status: "Active",
+          createdAt: "2024-03-15",
+          approvedAt: "2024-03-16",
+        },
+        {
+          id: "loan-3",
+          userId: "user-1",
+          loanType: "Auto",
+          amount: 3500000,
+          interestRate: 10.0,
+          durationMonths: 36,
+          collateral: "Vehicle Title",
+          status: "Pending",
+          createdAt: "2024-12-06",
+          approvedAt: null,
+        },
+        {
+          id: "loan-4",
+          userId: "user-1",
+          loanType: "Education",
+          amount: 750000,
+          interestRate: 8.0,
+          durationMonths: 18,
+          collateral: "None",
+          status: "Paid",
+          createdAt: "2023-05-20",
+          approvedAt: "2023-05-21",
+        },
+      ];
+
+      // Helper to calculate due date
+      function calculateDueDate(approvedAt, durationMonths) {
+        if (!approvedAt) return "N/A";
+        const date = new Date(approvedAt);
+        date.setMonth(date.getMonth() + durationMonths);
+        return date.toISOString().split("T")[0];
+      }
+
+      // Helper to check if a loan is past due
+      function checkPastDue(loan) {
+        if (loan.status !== "Active" || !loan.approvedAt) return false;
+
+        // Simulating the past due date relative to the current simulated date (2025-12-06)
+        const dueDate = calculateDueDate(loan.approvedAt, loan.durationMonths);
+        const simulatedToday = "2025-12-06";
+
+        // Loan-1 (Due Jan 1, 2025) is PAST DUE relative to Dec 6, 2025
+        if (loan.id === "loan-1" && dueDate < simulatedToday) return true;
+
+        return false;
+      }
+
+      function getLoans() {
+        try {
+          const storedLoans = localStorage.getItem("FinexaLoans_loans");
+          return storedLoans ? JSON.parse(storedLoans) : dummyLoans;
+        } catch (e) {
+          console.error("Error loading loans:", e);
+          return dummyLoans;
+        }
+      }
+
+      function saveLoans(loans) {
+        localStorage.setItem("FinexaLoans_loans", JSON.stringify(loans));
+      }
+
+      function formatCurrency(amount) {
+        // Corrected to return the string output directly
+        return new Intl.NumberFormat("en-NG", {
+          style: "currency",
+          currency: "NGN",
+          minimumFractionDigits: 0,
+        }).format(amount);
+      }
+
+      // REDESIGNED TOAST FUNCTION (Border/Low Opacity/Modern Look)
+      function showToast(message, type = "success") {
+        const container = document.getElementById("toast-container");
+        const toast = document.createElement("div");
+
+        let textClass = "text-success";
+        let iconHtml =
+          '<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-check"><path d="M20 6 9 17l-5-5"/></svg>';
+        let iconBorderClass = "border-success";
+        let title = "Success!";
+
+        if (type === "error") {
+          textClass = "text-destructive";
+          iconBorderClass = "border-destructive";
+          iconHtml =
+            '<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-x"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg>';
+          title = "Error!";
+        } else if (type === "warning") {
+          textClass = "text-warning";
+          iconBorderClass = "border-warning";
+          iconHtml =
+            '<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-hourglass"><path d="M5 18v-3.5a1.5 1.5 0 0 1 3 0V18"/><path d="M5 6v3.5a1.5 1.5 0 0 0 3 0V6"/><line x1="8" x2="16" y1="18" y2="18"/><line x1="8" x2="16" y1="6" y2="6"/><path d="M16 18v-3.5a1.5 1.5 0 0 0-3 0V18"/><path d="M16 6v3.5a1.5 1.5 0 0 1-3 0V6"/><path d="M22 22 16 18 13.5 15.5 13.5 8.5 16 6 22 2M2 2l6 4 2.5 2.5 0 7 2.5 2.5 6 4"/></svg>';
+          title = "Pending...";
+        }
+
+        toast.className = "p-3 w-80 toast-pill animate-fade-in";
+
+        // Structured HTML resembling the image
+        toast.innerHTML = `
+          <div class="flex items-start gap-3">
+            <div class="icon-border ${iconBorderClass} ${textClass}">
+                ${iconHtml}
+            </div>
+            <div class="flex-1 space-y-0.5">
+                <p class="font-semibold text-sm">${title}</p>
+                <p class="text-muted-foreground text-sm">${message}</p>
+            </div>
+            <button onclick="this.closest('.toast-pill').remove()" class="text-muted-foreground hover:text-foreground">
+                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-x"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg>
+            </button>
+          </div>
+        `;
+
+        container.appendChild(toast);
+
+        // Auto-remove logic remains the same
+        setTimeout(() => {
+          toast.classList.remove("animate-fade-in");
+          toast.classList.add("opacity-0", "translate-y-2");
+          toast.addEventListener("transitionend", () => toast.remove());
+        }, 4000);
+      }
+
+      // --- DASHBOARD STATE & RENDER ---
+      let loans = getLoans();
+      let selectedLoanForPayment = null;
+
+      function getStatusStyles(status) {
+        switch (status) {
+          // Changed Active to use warning/yellow for emphasis
+          case "Active":
+            return "bg-warning/10 text-warning";
+          // Changed Pending to use info/blue for in-progress status
+          case "Pending":
+            return "bg-info/10 text-info";
+          // Kept Paid the same (muted/grey)
+          case "Paid":
+            return "bg-muted text-muted-foreground";
+          case "Defaulted":
+            return "bg-destructive/10 text-destructive";
+          default:
+            return "bg-muted text-muted-foreground";
+        }
+      }
+
+      function getLoanDisplayStatus(loan) {
+        if (loan.status === "Active" && checkPastDue(loan)) {
+          return {
+            status: "Past Due",
+            style: "bg-destructive/20 text-destructive font-bold",
+          };
+        }
+        return { status: loan.status, style: getStatusStyles(loan.status) };
+      }
+
+      function renderDashboard() {
+        const root = document.getElementById("root");
+        const activeLoans = loans.filter((l) => l.status === "Active");
+        const totalActive = activeLoans.reduce((sum, l) => sum + l.amount, 0);
+        const pendingCount = loans.filter((l) => l.status === "Pending").length;
+        const paidCount = loans.filter((l) => l.status === "Paid").length;
+        const totalLoans = loans.length;
+
+        root.innerHTML = `
+                <div class="min-h-screen bg-background">
+                    <header class="border-b border-border/30">
+                        <div class="max-w-6xl mx-auto px-6 py-4 flex items-center justify-between">
+                            <a href="index.html" class="text-xl font-semibold">FinexaLoans</a>
+                            <div class="flex items-center gap-3">
+                                <button id="make-payment-btn" class="inline-flex items-center justify-center gap-2 whitespace-nowrap text-sm font-medium rounded-md border bg-card hover:bg-secondary h-9 px-3 border-border">
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-credit-card h-4 w-4 mr-2"><rect width="20" height="14" x="2" y="5" rx="2"></rect><line x1="2" x2="22" y1="10" y2="10"></line></svg>
+                                    Make Payment
+                                </button>
+                                <a href="index.html" onclick="localStorage.removeItem('isAuthenticated')">
+                                    <button class="inline-flex items-center justify-center gap-2 whitespace-nowrap text-sm font-medium hover:bg-secondary h-9 rounded-md px-3 text-muted-foreground hover:text-foreground">
+                                        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-log-out h-4 w-4"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path><polyline points="16 17 21 12 16 7"></polyline><line x1="21" x2="9" y1="12" y2="12"></line></svg>
+                                    </button>
+                                </a>
+                            </div>
+                        </div>
+                    </header>
+
+                    <main class="max-w-6xl mx-auto px-6 py-10">
+                        <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-10">
+                            
+                            <div class="p-6 rounded-2xl border border-warning/30 bg-warning/5">
+                                <div class="flex items-center gap-3 mb-3">
+                                    <div class="w-10 h-10 rounded-xl bg-warning/10 flex items-center justify-center">
+                                        <span class="text-warning font-semibold text-lg">${
+                                          activeLoans.length
+                                        }</span>
+                                    </div>
+                                    <span class="text-sm text-muted-foreground">Active Loans</span>
+                                </div>
+                                <div class="text-2xl font-bold text-warning">${formatCurrency(
+                                  totalActive
+                                )}</div>
+                                <div class="text-xs text-muted-foreground mt-1">Outstanding Balance</div>
+                            </div>
+                            
+                            <div class="p-6 rounded-2xl border border-info/30 bg-info/5">
+                                <div class="flex items-center gap-3 mb-3">
+                                    <div class="w-10 h-10 rounded-xl bg-info/10 flex items-center justify-center">
+                                        <span class="text-info font-semibold text-lg">${pendingCount}</span>
+                                    </div>
+                                    <span class="text-sm text-muted-foreground">Pending Applications</span>
+                                </div>
+                                <div class="text-2xl font-bold text-info">${
+                                  pendingCount === 0
+                                    ? "All Clear"
+                                    : pendingCount + " waiting"
+                                }</div>
+                                <div class="text-xs text-muted-foreground mt-1">Awaiting approval</div>
+                            </div>
+                            
+                            <div class="p-6 rounded-2xl border border-success/30 bg-success/5">
+                                <div class="flex items-center gap-3 mb-3">
+                                    <div class="w-10 h-10 rounded-xl bg-success/10 flex items-center justify-center">
+                                        <span class="text-success font-semibold text-lg">${paidCount}</span>
+                                    </div>
+                                    <span class="text-sm text-muted-foreground">Completed Loans</span>
+                                </div>
+                                <div class="text-2xl font-bold text-success">${paidCount} paid off</div>
+                                <div class="text-xs text-muted-foreground mt-1">Great job!</div>
+                            </div>
+                            
+                            <div class="p-6 rounded-2xl border border-border bg-card">
+                                <div class="flex items-center gap-3 mb-3">
+                                    <div class="w-10 h-10 rounded-xl bg-secondary flex items-center justify-center">
+                                        <span class="text-muted-foreground font-semibold text-lg">${totalLoans}</span>
+                                    </div>
+                                    <span class="text-sm text-muted-foreground">Total Loans</span>
+                                </div>
+                                <div class="text-2xl font-bold">${totalLoans} applications</div>
+                            </div>
+                        </div>
+
+                        <div class="flex items-center justify-between mb-6">
+                            <h2 class="text-2xl font-bold">Your Loans</h2>
+                            <button id="new-loan-btn" class="inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md text-sm font-medium h-10 px-4 py-2 bg-primary text-primary-foreground hover:bg-primary/90">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-plus h-4 w-4 mr-2"><path d="M5 12h14"></path><path d="M12 5v14"></path></svg>
+                                New Loan
+                            </button>
+                        </div>
+
+                        <div class="loans-grid grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                            ${loans
+                              .map((loan) => {
+                                const display = getLoanDisplayStatus(loan);
+                                const isPayable =
+                                  loan.status === "Active" ||
+                                  display.status === "Past Due";
+
+                                return `
+                                <div 
+                                    class="p-6 rounded-2xl border border-border bg-card glass-hover loan-card-clickable"
+                                    data-loan-id="${loan.id}"
+                                    onclick="showLoanDetails('${loan.id}')"
+                                >
+                                    <div class="flex justify-between items-start">
+                                        <h3 class="text-lg font-semibold">${
+                                          loan.loanType
+                                        } Loan</h3>
+                                        <span class="px-3 py-1 rounded-full text-xs font-medium ${
+                                          display.style
+                                        }">
+                                            ${display.status}
+                                        </span>
+                                    </div>
+                                    
+                                    <div class="text-3xl font-bold my-3 ${
+                                      display.status === "Past Due"
+                                        ? "text-destructive"
+                                        : "text-foreground"
+                                    }">
+                                        ${formatCurrency(loan.amount)}
+                                    </div>
+                                    
+                                    <div class="flex justify-between items-center text-sm text-muted-foreground">
+                                        <span>${loan.durationMonths} months @ ${
+                                  loan.interestRate
+                                }%</span>
+                                        ${
+                                          isPayable
+                                            ? `
+                                            <button 
+                                                class="pay-loan-btn inline-flex items-center justify-center gap-2 whitespace-nowrap text-xs font-medium rounded-md border bg-card hover:bg-secondary h-7 px-3 border-border shrink-0 z-10"
+                                                data-loan-id="${loan.id}"
+                                                onclick="event.stopPropagation(); showPaymentModal('${loan.id}')"
+                                            >
+                                                Pay Now
+                                            </button>
+                                        `
+                                            : ""
+                                        }
+                                    </div>
+                                </div>
+                                `;
+                              })
+                              .join("")}
+
+                            ${
+                              loans.length === 0
+                                ? `
+                                <div class="text-center py-16 col-span-full">
+                                    <p class="text-muted-foreground mb-4">No loans yet</p>
+                                    <button id="no-loans-apply-btn" class="bg-primary text-primary-foreground hover:bg-primary/90 inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md text-sm font-medium h-10 px-4 py-2">
+                                        Apply for a Loan
+                                    </button>
+                                </div>
+                            `
+                                : ""
+                            }
+                        </div>
+                    </main>
+                </div>
+            `;
+
+        // Attach event listeners after rendering
+        document
+          .getElementById("new-loan-btn")
+          .addEventListener("click", showNewLoanModal);
+        if (document.getElementById("no-loans-apply-btn")) {
+          document
+            .getElementById("no-loans-apply-btn")
+            .addEventListener("click", showNewLoanModal);
+        }
+        document
+          .getElementById("make-payment-btn")
+          .addEventListener("click", () => showPaymentModal(null));
+        // Clicks handled by onclick attribute on the loan card div
+      }
+
+      // --- LOAN DETAILS MODAL LOGIC ---
+      function closeLoanDetailsModal() {
+        document.getElementById("loan-details-modal").style.display = "none";
+      }
+
+      function showLoanDetails(loanId) {
+        const loan = loans.find((l) => l.id === loanId);
+        if (!loan) return;
+
+        const display = getLoanDisplayStatus(loan);
+        const isPastDue = display.status === "Past Due";
+        const isPending = display.status === "Pending";
+        const statusStyle = getStatusStyles(loan.status);
+        const dueDate = calculateDueDate(loan.approvedAt, loan.durationMonths);
+
+        // Apply Destructive styling globally if Past Due
+        const destructiveClass = isPastDue ? "text-destructive" : "";
+
+        document.getElementById(
+          "modal-loan-type"
+        ).textContent = `${loan.loanType} Loan Details`;
+        document.getElementById("modal-status").textContent = display.status;
+        document.getElementById(
+          "modal-status-card"
+        ).className = `p-4 rounded-xl border ${statusStyle.replace(
+          /text-.* /,
+          "text-foreground"
+        )} ${isPastDue ? "border-destructive/50" : "border-border"}`;
+        document.getElementById(
+          "modal-status"
+        ).className = `font-semibold px-3 py-1 rounded-full text-xs ${display.style}`;
+
+        document.getElementById("modal-amount").textContent = formatCurrency(
+          loan.amount
+        );
+        document.getElementById(
+          "modal-amount"
+        ).className = `font-bold text-lg ${destructiveClass}`;
+
+        document.getElementById(
+          "modal-rate"
+        ).textContent = `${loan.interestRate}%`;
+        document.getElementById(
+          "modal-duration"
+        ).textContent = `${loan.durationMonths} months`;
+        document.getElementById("modal-collateral").textContent =
+          loan.collateral;
+
+        document.getElementById("modal-created-at").textContent =
+          loan.createdAt;
+        document.getElementById("modal-approved-at").textContent =
+          loan.approvedAt || "N/A";
+
+        document.getElementById("modal-due-date").textContent = isPending
+          ? "Pending Approval"
+          : dueDate;
+        document.getElementById("modal-due-date").className = `font-semibold ${
+          isPastDue ? "text-destructive" : "text-foreground"
+        }`;
+
+        // Button logic
+        const payButton = document.getElementById("modal-pay-button");
+        if (loan.status === "Active" || isPastDue) {
+          payButton.style.display = "block";
+          payButton.textContent = isPastDue
+            ? "Make Overdue Payment"
+            : "Make Payment";
+          payButton.onclick = (e) => {
+            closeLoanDetailsModal();
+            showPaymentModal(loan.id);
+          };
+        } else {
+          payButton.style.display = "none";
+        }
+
+        document.getElementById("loan-details-modal").style.display = "flex";
+      }
+
+      // --- NEW LOAN MODAL LOGIC ---
+      function showNewLoanModal() {
+        document.getElementById("new-loan-modal").style.display = "flex";
+      }
+
+      function closeNewLoanModal() {
+        document.getElementById("new-loan-modal").style.display = "none";
+        // Reset form and errors
+        document.getElementById("new-loan-form").reset();
+        document.getElementById("error-loanType").classList.add("hidden");
+        document.getElementById("error-amount").classList.add("hidden");
+        document.getElementById("error-durationMonths").classList.add("hidden");
+      }
+
+      function handleAddLoan(e) {
+        e.preventDefault();
+
+        const form = {
+          loanType: document.getElementById("loan-type").value,
+          amount: document.getElementById("amount").value,
+          durationMonths: document.getElementById("duration").value,
+          collateral: document.getElementById("collateral").value,
+        };
+
+        // Validation
+        let hasErrors = false;
+        document.getElementById("error-loanType").classList.add("hidden");
+        document.getElementById("error-amount").classList.add("hidden");
+        document.getElementById("error-durationMonths").classList.add("hidden");
+
+        if (!form.loanType) {
+          document.getElementById("error-loanType").textContent =
+            "Loan type is required";
+          document.getElementById("error-loanType").classList.remove("hidden");
+          hasErrors = true;
+        }
+        if (!form.amount || parseFloat(form.amount) <= 0) {
+          document.getElementById("error-amount").textContent =
+            "Valid amount is required";
+          document.getElementById("error-amount").classList.remove("hidden");
+          hasErrors = true;
+        }
+        if (!form.durationMonths || parseInt(form.durationMonths) <= 0) {
+          document.getElementById("error-durationMonths").textContent =
+            "Valid duration is required";
+          document
+            .getElementById("error-durationMonths")
+            .classList.remove("hidden");
+          hasErrors = true;
+        }
+        if (hasErrors) return;
+
+        const newLoanData = {
+          loanType: form.loanType,
+          amount: parseFloat(form.amount),
+          interestRate: INTEREST_RATES[form.loanType],
+          durationMonths: parseInt(form.durationMonths),
+          collateral: form.collateral || "None",
+        };
+
+        const loan = {
+          ...newLoanData,
+          id: `loan-${Date.now()}`,
+          userId: "user-1",
+          status: "Pending",
+          createdAt: new Date().toISOString().split("T")[0],
+        };
+
+        loans = [loan, ...loans];
+        saveLoans(loans);
+        closeNewLoanModal();
+        showToast("Loan application submitted! Approval pending...", "warning");
+        renderDashboard();
+        scheduleLoanApproval(loan.id);
+      }
+
+      // Simulates auto-approval after 6 seconds
+      function scheduleLoanApproval(loanId) {
+        setTimeout(() => {
+          const loanIndex = loans.findIndex((l) => l.id === loanId);
+          if (loanIndex !== -1 && loans[loanIndex].status === "Pending") {
+            const approvedLoan = {
+              ...loans[loanIndex],
+              status: "Active",
+              approvedAt: new Date().toISOString().split("T")[0],
+            };
+            loans[loanIndex] = approvedLoan;
+            saveLoans(loans);
+            showToast(
+              `Loan approved! ${formatCurrency(approvedLoan.amount)} ${
+                approvedLoan.loanType
+              } loan is now active.`,
+              "success"
+            );
+            renderDashboard();
+          }
+        }, 6000); // 6 seconds for demo, original was 60s
+      }
+
+      // --- PAYMENT MODAL LOGIC ---
+      function closePaymentModal() {
+        document.getElementById("payment-modal").style.display = "none";
+        document.getElementById("payment-form").reset();
+        document.getElementById("error-payment").classList.add("hidden");
+        document.getElementById("loan-details").classList.add("hidden");
+        selectedLoanForPayment = null;
+      }
+
+      function showPaymentModal(loanId = null) {
+        const activeLoans = loans.filter((l) => l.status === "Active");
+        const select = document.getElementById("payment-loan-select");
+        const form = document.getElementById("payment-form");
+        const noLoansMessage = document.getElementById("no-loans-message");
+
+        // Clear previous options
+        select.innerHTML = '<option value="">Choose a loan</option>';
+
+        if (activeLoans.length === 0) {
+          form.classList.add("hidden");
+          noLoansMessage.classList.remove("hidden");
+          document.getElementById("payment-modal").style.display = "flex";
+          return;
+        }
+
+        form.classList.remove("hidden");
+        noLoansMessage.classList.add("hidden");
+
+        activeLoans.forEach((loan) => {
+          const option = document.createElement("option");
+          option.value = loan.id;
+          option.textContent = `${loan.loanType} - ${formatCurrency(
+            loan.amount
+          )}`;
+          select.appendChild(option);
+        });
+
+        if (loanId) {
+          selectedLoanForPayment = loanId;
+          select.value = loanId;
+          updateLoanDetails(loanId);
+        } else {
+          updateLoanDetails("");
+        }
+
+        select.onchange = (e) => {
+          selectedLoanForPayment = e.target.value;
+          updateLoanDetails(selectedLoanForPayment);
+          document.getElementById("error-payment").classList.add("hidden");
+        };
+
+        document.getElementById("payment-amount").oninput = () => {
+          document.getElementById("error-payment").classList.add("hidden");
+        };
+
+        document.getElementById("payment-modal").style.display = "flex";
+      }
+
+      function updateLoanDetails(loanId) {
+        const loanDetailsDiv = document.getElementById("loan-details");
+        const currentLoan = loans.find((l) => l.id === loanId);
+
+        if (currentLoan) {
+          document.getElementById("loan-balance").textContent = formatCurrency(
+            currentLoan.amount
+          );
+          document.getElementById(
+            "loan-interest"
+          ).textContent = `${currentLoan.interestRate}%`;
+          loanDetailsDiv.classList.remove("hidden");
+        } else {
+          loanDetailsDiv.classList.add("hidden");
+        }
+      }
+
+      function handlePayLoan(e) {
+        e.preventDefault();
+
+        const loanId = document.getElementById("payment-loan-select").value;
+        const amountInput = document.getElementById("payment-amount");
+        const paymentAmount = parseFloat(amountInput.value);
+        const errorElement = document.getElementById("error-payment");
+        const currentLoan = loans.find((l) => l.id === loanId);
+
+        errorElement.classList.add("hidden");
+
+        if (!loanId) {
+          errorElement.textContent = "Please select a loan";
+          errorElement.classList.remove("hidden");
+          return;
+        }
+
+        if (!paymentAmount || paymentAmount <= 0) {
+          errorElement.textContent = "Please enter a valid amount";
+          errorElement.classList.remove("hidden");
+          return;
+        }
+
+        if (currentLoan && paymentAmount > currentLoan.amount) {
+          errorElement.textContent = "Amount exceeds loan balance";
+          errorElement.classList.remove("hidden");
+          return;
+        }
+
+        // Process Payment
+        loans = loans.map((loan) => {
+          if (loan.id === loanId) {
+            const remainingBalance = loan.amount - paymentAmount;
+            if (remainingBalance <= 0) {
+              showToast("Loan fully paid off! 🎉", "success");
+              return { ...loan, status: "Paid", amount: 0 };
+            }
+            showToast(
+              `Payment of ${formatCurrency(paymentAmount)} successful!`,
+              "success"
+            );
+            return { ...loan, amount: remainingBalance };
+          }
+          return loan;
+        });
+        saveLoans(loans);
+        closePaymentModal();
+        renderDashboard();
+      }
+
+      // --- INITIALIZATION ---
+      document.addEventListener("DOMContentLoaded", () => {
+        // Check for authentication
+        if (localStorage.getItem("isAuthenticated") !== "true") {
+          // Redirect to login page if not authenticated
+          window.location.href = "auth.html?mode=signin";
+          return;
+        }
+
+        // Check for pending loans to schedule approval on load
+        loans
+          .filter((l) => l.status === "Pending")
+          .forEach((loan) => scheduleLoanApproval(loan.id));
+
+        // Setup form listeners
+        document
+          .getElementById("new-loan-form")
+          .addEventListener("submit", handleAddLoan);
+        document
+          .getElementById("payment-form")
+          .addEventListener("submit", handlePayLoan);
+
+        // Initial render
+        renderDashboard();
+      });
+    </script>
+  </body>
+</html>
