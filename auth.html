@@ -81,6 +81,7 @@
         padding: 0.75rem 1rem; /* px-4 py-3 */
         width: 100%;
         transition: border-color 150ms;
+        color: hsl(var(--foreground));
       }
       .custom-input:focus {
         outline: none;
@@ -384,6 +385,55 @@
       const initialMode = urlParams.get("mode");
 
       // --- Utility Functions (Kept local as they are UI-specific) ---
+      // Enhanced Toast Function (since the simple alert was used before)
+      function showToast(message, type = "success", title = "Status") {
+        const container = document.getElementById("toast-container");
+        const toast = document.createElement("div");
+
+        let textClass = "text-success";
+        let iconHtml =
+          '<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-check"><path d="M20 6 9 17l-5-5"/></svg>';
+        let iconBorderClass = "border-success";
+
+        if (type === "error") {
+          textClass = "text-destructive";
+          iconBorderClass = "border-destructive";
+          iconHtml =
+            '<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-x"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg>';
+          title = "Error!";
+        } else if (type === "warning") {
+          textClass = "text-warning";
+          iconBorderClass = "border-warning";
+          iconHtml =
+            '<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-alert-triangle"><path d="m21.73 18.73-8.86-15.34a2 2 0 0 0-3.54 0l-8.86 15.34a2 2 0 0 0 1.77 3.27h17.72a2 2 0 0 0 1.77-3.27Z"/><path d="M12 9v4"/><path d="M12 17h.01"/></svg>';
+          title = "Warning";
+        }
+
+        toast.className = "p-3 w-80 toast-pill animate-fade-in";
+
+        toast.innerHTML = `
+                <div class="flex items-start gap-3">
+                    <div class="icon-border ${iconBorderClass} ${textClass}">
+                        ${iconHtml}
+                    </div>
+                    <div class="flex-1 space-y-0.5">
+                        <p class="font-semibold text-sm">${title}</p>
+                        <p class="text-muted-foreground text-sm">${message}</p>
+                    </div>
+                    <button onclick="this.closest('.toast-pill').remove()" class="text-muted-foreground hover:text-foreground">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-x"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg>
+                    </button>
+                </div>
+            `;
+
+        container.appendChild(toast);
+
+        setTimeout(() => {
+          toast.classList.remove("animate-fade-in");
+          toast.classList.add("opacity-0", "translate-y-2");
+          toast.addEventListener("transitionend", () => toast.remove());
+        }, 4000);
+      }
 
       function getInputValue(field) {
         const el = document.getElementById(field);
@@ -407,15 +457,10 @@
       }
 
       function clearErrors() {
-        Object.keys(errors).forEach((field) => updateErrorDisplay(field, ""));
+        Object.keys(initialFormState).forEach((field) =>
+          updateErrorDisplay(field, "")
+        );
         errors = {};
-      }
-
-      // Note: This is a placeholder that needs to be implemented fully
-      // or imported if the full modern toast logic is needed here too.
-      function showToast(message, type = "success", title = "Status") {
-        // Placeholder implementation for authentication UI feedback
-        alert(`${title}: ${message}`);
       }
 
       function setButtonLoading(button, isLoading, originalText) {
@@ -451,8 +496,10 @@
         if (!formData.Address) newErrors.Address = "Address is required";
         if (!formData.NIN || formData.NIN.length !== 11)
           newErrors.NIN = "NIN must be 11 digits";
-        if (!formData.BVN || formData.BVN.length !== 11)
-          newErrors.BVN = "BVN must be 11 digits";
+        // NOTE: BVN is not strictly required for account creation, but we enforce 11 digits if provided
+        if (formData.BVN && formData.BVN.length !== 11)
+          newErrors.BVN = "BVN must be 11 digits or empty";
+
         if (!formData.Password) {
           newErrors.Password = "Password is required";
         } else if (formData.Password.length < 8) {
@@ -487,12 +534,8 @@
           const field = input.id;
           if (formData.hasOwnProperty(field)) {
             formData[field] = input.value.trim();
-            if (errors[field]) {
-              updateErrorDisplay(field, "");
-            }
           }
         });
-        errors = {};
       }
 
       function renderMode() {
@@ -519,7 +562,7 @@
         renderMode();
       }
 
-      // --- Main Logic & Handlers (Integrated with Supabase and FIXES applied) ---
+      // --- Main Logic & Handlers ---
 
       async function handleSubmit(e) {
         e.preventDefault();
@@ -544,7 +587,6 @@
               );
 
               if (error) {
-                // Check for specific confirmation error
                 if (error.message.includes("Email not confirmed")) {
                   showToast(
                     "Please check your email and confirm your account before signing in.",
@@ -565,10 +607,31 @@
               const { user, error } = await signUpAndInsertUser(formData);
 
               if (error) {
-                showToast(`Signup failed: ${error.message}`, "error");
+                // Supabase Auth provides detailed errors
+                if (error.message.includes("User already registered")) {
+                  showToast(
+                    "This email is already registered. Please sign in to your account.",
+                    "warning",
+                    "Already Registered"
+                  );
+                  // Switch to login mode to guide the user to the correct action
+                  isLogin = true;
+                  renderMode();
+                } else if (error.message.includes("Profile creation failed")) {
+                  // Handle the scenario where Auth succeeded but the profile insertion (DB) failed.
+                  showToast(
+                    "Account created (Auth), but profile saving failed. Please sign in and check your dashboard.",
+                    "error",
+                    "DB Error"
+                  );
+                  isLogin = true;
+                  renderMode();
+                } else {
+                  // General failure
+                  showToast(`Signup failed: ${error.message}`, "error");
+                }
               } else {
-                // Crucial Fix: Supabase sign-up succeeds but the user is NOT immediately logged in
-                // if email confirmation is required. We guide the user back to the login screen.
+                // Successful Auth signup, now switch to login for confirmation
                 showToast(
                   "Account created! Please check your email for a confirmation link.",
                   "warning",
@@ -585,7 +648,7 @@
         }
       }
 
-      // --- Initialization (FIXED) ---
+      // --- Initialization ---
       document.addEventListener("DOMContentLoaded", async () => {
         // Check if user is already logged in before rendering the form
         const user = await getCurrentUser();
