@@ -32,6 +32,7 @@ export async function signIn(email, password) {
  */
 export async function signUpAndInsertUser(userData) {
   // 1. Sign up the user via Supabase Auth
+  // If confirmation is OFF on server, this will auto-login and return a session/user object.
   const { data: authData, error: authError } = await supabaseClient.auth.signUp(
     {
       email: userData.Email,
@@ -49,7 +50,14 @@ export async function signUpAndInsertUser(userData) {
     return { user: null, error: authError };
   }
 
-  const userId = authData.user.id;
+  const userId = authData.user?.id || authData.session?.user.id;
+
+  if (!userId) {
+    return {
+      user: null,
+      error: new Error("Auth user ID not found after sign up/in."),
+    };
+  }
 
   // 2. Insert detailed user data into the 'users' table
   const { error: userInsertError } = await supabaseClient.from("users").insert({
@@ -67,7 +75,6 @@ export async function signUpAndInsertUser(userData) {
   });
 
   if (userInsertError) {
-    // Log the error but proceed with auth user if sign-up was successful
     console.error("Failed to insert user details:", userInsertError);
     return {
       user: authData.user,
@@ -75,6 +82,7 @@ export async function signUpAndInsertUser(userData) {
     };
   }
 
+  // Return the user object, which should now be logged in due to server config.
   return { user: authData.user, error: null };
 }
 
