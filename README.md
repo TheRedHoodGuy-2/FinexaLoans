@@ -6,11 +6,9 @@ This document serves as the **Technical Documentation and System Architecture** 
 
 The system utilizes a **Client-Serverless** architecture, relying on client-side JavaScript for logic and **Supabase (PostgreSQL)** as its Backend-as-a-Service (BaaS).
 
----
 
-### Group 5 Contributor Listing
 
-> **Note:** The contributor list below contains the original names and matric numbers provided for the "Babcock Cleaning Booking System" (Group 5). If these names are incorrect for the FinexaLoans (Group 10) project, please provide the updated contributor list.
+### Group 10 Contributor Listing
 
 | **Area** | **Name** | **Matric** |
 | :--- | :--- | :--- |
@@ -22,28 +20,9 @@ The system utilizes a **Client-Serverless** architecture, relying on client-side
 | | NNAEMEKA CHRISTOPHER | 22/2181 |
 | | OKON ISRAEL EYIBIO | 22/1677 |
 | | ONYEODIZIELU UGOCHUKWU M. | 22/1161 |
-| | VICTOR DAKOH IKPEMINOGHENA | 22/2957 |
+| | VICTOR DAKOH IKEMINOGHENA | 22/2957 |
 | | YISA MORDECAI | 22/1890 |
-| | Ene-Dede Precious Deinma | 22/2420 |
-| | Okafor Ebubechukwu Samuel | 22/2332 |
-| | Nyuiring-Yohrhagninyui | 21/3135 |
-| | Odedele Segun | 21/1850 |
-| | Obisanya Dominion | 22/1822 |
-| | Epebinu Ayomipo Daniel | 22/2423 |
-| | Agi Vine Ozioma | 22/3087 |
-| | Ifunanya Osonwa | 22/2911 |
-| | Ogiye Jennifer | 22/2585 |
-| | Oranika John | 22/2994 |
-| **Database Design** | Olugbeje Boluwatife Modupe | 22/2408 |
-| | Chigbo Chidubem | 17/1740 |
-| | Solomon Chukwuemeka Marvelous | 22/1889 |
-| | Olukoya Ayoola | 20/0096 |
-| | Towolawi Omotola Faith | 22/1695 |
-| | Udotong Jeremiah William | 22/0843 |
-| | Abiola Oluwasemilore Esther | 23/1489 |
-| | Ororho Uruemesiri David | 23/2546 |
-| | Soji-Oni Ayomide Testimony | 22/1054 |
-| | Obih Joan Chidinma | 22/2610 |
+| **Database Design** | Obih Joan Chidinma | 22/2610 |
 | | Enakirerhi Julian | 23/1909 |
 | | Obika Martins Akachukwu | 22/1248 |
 | | Okpalanajiaku Xavier | 22/2549 |
@@ -51,15 +30,7 @@ The system utilizes a **Client-Serverless** architecture, relying on client-side
 | | Vwarak Bliss-David | 22/3007 |
 | | Olubiyi Oluwatise Ikhafoghwe | 22/1148 |
 | | Onwusah Dorachima Ifeanyi | 23/0984 |
-| **CGI Scripting** | Ibironke Victor Damilola | 23/1084 |
-| | Onasanya Grace | 22/2763 |
-| | Olatunji Oluwafemi Temitope | 22/0566 |
-| | Itamah Osedebame Ehigie | 23/1860 |
-| | Nwosu Jason | 22/0927 |
-| | Olungwe Christian | 22/0633 |
-| | Nathaniel Abraham Owoidighe | 22/1915 |
-| | Madagwa Success | 22/2386 |
-| | Pinwa Joshua Nwibari | 22/1290 |
+| **CGI Scripting** | Pinwa Joshua Nwibari | 22/1290 |
 | | Oluwafemi Oluwasemilore Esther | 22/1399 |
 | | Onyenweaku Chibundu Emmanuel | 21/1872 |
 | | Obunadike Nzubechukwu | 23/2932 |
@@ -68,7 +39,7 @@ The system utilizes a **Client-Serverless** architecture, relying on client-side
 | | Ogbonna Somtochukwu David | 22/3026 |
 | | Soyinka Oluwadarasimi Toluwalase | 22/1022 |
 
----
+
 
 ## 2. Core Architecture and Technology Stack
 
@@ -83,7 +54,7 @@ FinexaLoans uses a **Client-Serverless** architecture, relying on client-side Ja
 | **Backend (BaaS)** | Supabase (PostgreSQL) | Provides database, authentication service, and auto-generated RESTful API endpoints. |
 | **Security** | Supabase Auth, Row Level Security (RLS) | Secures the data layer, ensuring a user can only interact with their own data. |
 
----
+
 
 ## 3. Frontend Design and User Flow
 
@@ -107,7 +78,7 @@ The dashboard is dynamically rendered by `renderDashboard()` which runs upon pag
 * **Metrics Calculation**: Key metrics—**Active Loans**, **Pending Applications**, and **Completed Loans**—are calculated client-side based on the fetched data and displayed in distinct, color-coded cards.
 * **Status Indicators**: Each loan card uses a specific background and text color to instantly indicate status: **'Active'** (Warning/Yellow), **'Pending'** (Info/Blue), **'Paid'** (Success/Green), and **'Past Due'** (Destructive/Red).
 
----
+
 
 ## 4. Database Schema and Persistence
 
@@ -130,7 +101,7 @@ Database constraints are used to enforce business rules at the persistence layer
 * **Check Constraints**: Application-level checks ensure the financial data is valid. For example, `amount` must be $\ge 0$ and `interest_rate` must be $>0$ and $<1$.
 * **Indexing**: Indexes are created on frequently queried foreign keys (`idx_loans_borrower_id`) and status columns (`idx_loans_status`) for performance optimization.
 
----
+
 
 ## 5. Scripting Logic and Data Flow
 
@@ -159,7 +130,7 @@ The `makePayment(loanId, paymentAmount)` function handles the financial transact
     $$remainingBalance = outstandingBalance - paymentAmount$$
     $$newStatus = \begin{cases} \text{'Paid'} & \text{if } remainingBalance \le 0.01 \\ \text{'Active'} & \text{otherwise} \end{cases}$$
 
----
+
 
 ## 6. Security and Authorization
 
