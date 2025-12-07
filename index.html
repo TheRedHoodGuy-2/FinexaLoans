@@ -4,7 +4,9 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>FinexaLoans - Loans Made Simple</title>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script src="https://cdn.tailwindcss.com"></script>
+    <script type="module" src="./scripting.js"></script>
     <script>
       tailwind.config = {
         darkMode: "class",
@@ -78,9 +80,7 @@
       /* UTILITIES from stylesheet */
       .glass {
         background-color: hsl(var(--card) / 0.5);
-        backdrop-filter: blur(
-          12px
-        ); /* Increased blur slightly for better effect */
+        backdrop-filter: blur(12px);
         border: 1px solid hsl(var(--border) / 0.5);
       }
       .glass-hover {
@@ -115,53 +115,7 @@
   </head>
   <body class="bg-background text-foreground min-h-screen">
     <div id="root">
-      <nav class="fixed top-0 left-0 right-0 z-50 glass">
-        <div
-          class="max-w-7xl mx-auto px-6 py-4 flex items-center justify-between"
-        >
-          <a href="index.html" class="text-xl font-semibold tracking-tight">
-            FinexaLoans
-          </a>
-          <div class="hidden md:flex items-center gap-8">
-            <a
-              href="#products"
-              class="text-sm text-muted-foreground hover:text-foreground transition-colors"
-              >Products</a
-            >
-            <a
-              href="#how-it-works"
-              class="text-sm text-muted-foreground hover:text-foreground transition-colors"
-              >How it Works</a
-            >
-            <a
-              href="#testimonials"
-              class="text-sm text-muted-foreground hover:text-foreground transition-colors"
-              >Reviews</a
-            >
-            <a
-              href="#faq"
-              class="text-xs text-muted-foreground hover:text-foreground transition-colors"
-              >FAQ</a
-            >
-          </div>
-          <div class="flex items-center gap-4">
-            <a href="auth.html?mode=signin">
-              <button
-                class="inline-flex items-center justify-center gap-2 whitespace-nowrap text-sm font-medium ring-offset-background transition-colors hover:bg-secondary h-9 rounded-md px-3 text-muted-foreground hover:text-foreground"
-              >
-                Sign in
-              </button>
-            </a>
-            <a href="auth.html?mode=signup">
-              <button
-                class="inline-flex items-center justify-center gap-2 whitespace-nowrap text-sm font-medium ring-offset-background transition-colors bg-primary text-background hover:bg-primary/90 h-9 rounded-md px-3"
-              >
-                Get Started
-              </button>
-            </a>
-          </div>
-        </div>
-      </nav>
+      <nav id="main-navbar" class="fixed top-0 left-0 right-0 z-50 glass"></nav>
 
       <section class="pt-32 pb-24 px-6">
         <div class="max-w-4xl mx-auto text-center">
@@ -468,7 +422,7 @@
                   xmlns="http://www.w3.org/2000/svg"
                   width="24"
                   height="24"
-                  viewBox="0 0 24 24"
+                  viewbox="0 0 24 24"
                   fill="none"
                   stroke="currentColor"
                   stroke-width="2"
@@ -500,7 +454,7 @@
                   xmlns="http://www.w3.org/2000/svg"
                   width="24"
                   height="24"
-                  viewBox="0 0 24 24"
+                  viewbox="0 0 24 24"
                   fill="none"
                   stroke="currentColor"
                   stroke-width="2"
@@ -522,7 +476,7 @@
                   xmlns="http://www.w3.org/2000/svg"
                   width="24"
                   height="24"
-                  viewBox="0 0 24 24"
+                  viewbox="0 0 24 24"
                   fill="none"
                   stroke="currentColor"
                   stroke-width="2"
@@ -556,7 +510,7 @@
                   xmlns="http://www.w3.org/2000/svg"
                   width="24"
                   height="24"
-                  viewBox="0 0 24 24"
+                  viewbox="0 0 24 24"
                   fill="none"
                   stroke="currentColor"
                   stroke-width="2"
@@ -578,7 +532,7 @@
                   xmlns="http://www.w3.org/2000/svg"
                   width="24"
                   height="24"
-                  viewBox="0 0 24 24"
+                  viewbox="0 0 24 24"
                   fill="none"
                   stroke="currentColor"
                   stroke-width="2"
@@ -611,7 +565,7 @@
                   xmlns="http://www.w3.org/2000/svg"
                   width="24"
                   height="24"
-                  viewBox="0 0 24 24"
+                  viewbox="0 0 24 24"
                   fill="none"
                   stroke="currentColor"
                   stroke-width="2"
@@ -633,7 +587,7 @@
                   xmlns="http://www.w3.org/2000/svg"
                   width="24"
                   height="24"
-                  viewBox="0 0 24 24"
+                  viewbox="0 0 24 24"
                   fill="none"
                   stroke="currentColor"
                   stroke-width="2"
@@ -663,7 +617,7 @@
                   xmlns="http://www.w3.org/2000/svg"
                   width="24"
                   height="24"
-                  viewBox="0 0 24 24"
+                  viewbox="0 0 24 24"
                   fill="none"
                   stroke="currentColor"
                   stroke-width="2"
@@ -750,7 +704,7 @@
                   xmlns="http://www.w3.org/2000/svg"
                   width="24"
                   height="24"
-                  viewBox="0 0 24 24"
+                  viewbox="0 0 24 24"
                   fill="none"
                   stroke="currentColor"
                   stroke-width="2"
@@ -779,7 +733,7 @@
                   xmlns="http://www.w3.org/2000/svg"
                   width="24"
                   height="24"
-                  viewBox="0 0 24 24"
+                  viewbox="0 0 24 24"
                   fill="none"
                   stroke="currentColor"
                   stroke-width="2"
@@ -808,7 +762,7 @@
                   xmlns="http://www.w3.org/2000/svg"
                   width="24"
                   height="24"
-                  viewBox="0 0 24 24"
+                  viewbox="0 0 24 24"
                   fill="none"
                   stroke="currentColor"
                   stroke-width="2"
@@ -836,7 +790,7 @@
                   xmlns="http://www.w3.org/2000/svg"
                   width="24"
                   height="24"
-                  viewBox="0 0 24 24"
+                  viewbox="0 0 24 24"
                   fill="none"
                   stroke="currentColor"
                   stroke-width="2"
@@ -1032,7 +986,7 @@
                   xmlns="http://www.w3.org/2000/svg"
                   width="24"
                   height="24"
-                  viewBox="0 0 24 24"
+                  viewbox="0 0 24 24"
                   fill="none"
                   stroke="currentColor"
                   stroke-width="2"
@@ -1164,5 +1118,113 @@
         </div>
       </footer>
     </div>
+
+    <script type="module">
+      import { getCurrentUser, signOut } from "./scripting.js";
+
+      const navbar = document.getElementById("main-navbar");
+
+      /**
+       * Renders the navigation bar based on the user's authentication status.
+       * @param {Object|null} user - The Supabase user object, or null if logged out.
+       */
+      function renderNav(user) {
+        let authButtonsHtml = "";
+
+        if (user) {
+          // Logged In State: Show Hi [Name] and Dashboard button
+          const firstName = user.user_metadata?.first_name || "User";
+
+          authButtonsHtml = `
+            <div class="flex items-center gap-4">
+              <span class="text-sm font-medium text-foreground">Hi, ${firstName}</span>
+              <a href="dashboard.html">
+                <button
+                  class="inline-flex items-center justify-center gap-2 whitespace-nowrap text-sm font-medium ring-offset-background transition-colors bg-primary text-background hover:bg-primary/90 h-9 rounded-md px-3"
+                >
+                  Dashboard
+                </button>
+              </a>
+              <button
+                id="logout-btn"
+                class="inline-flex items-center justify-center gap-2 whitespace-nowrap text-sm font-medium hover:bg-secondary h-9 rounded-md px-3 text-muted-foreground hover:text-foreground"
+              >
+                Logout
+              </button>
+            </div>
+          `;
+        } else {
+          // Logged Out State: Show Sign In and Get Started buttons
+          authButtonsHtml = `
+            <div class="flex items-center gap-4">
+              <a href="auth.html?mode=signin">
+                <button
+                  class="inline-flex items-center justify-center gap-2 whitespace-nowrap text-sm font-medium ring-offset-background transition-colors hover:bg-secondary h-9 rounded-md px-3 text-muted-foreground hover:text-foreground"
+                >
+                  Sign in
+                </button>
+              </a>
+              <a href="auth.html?mode=signup">
+                <button
+                  class="inline-flex items-center justify-center gap-2 whitespace-nowrap text-sm font-medium ring-offset-background transition-colors bg-primary text-background hover:bg-primary/90 h-9 rounded-md px-3"
+                >
+                  Get Started
+                </button>
+              </a>
+            </div>
+          `;
+        }
+
+        navbar.innerHTML = `
+          <div
+            class="max-w-7xl mx-auto px-6 py-4 flex items-center justify-between"
+          >
+            <a href="index.html" class="text-xl font-semibold tracking-tight">
+              FinexaLoans
+            </a>
+            <div class="hidden md:flex items-center gap-8">
+              <a
+                href="#products"
+                class="text-sm text-muted-foreground hover:text-foreground transition-colors"
+                >Products</a
+              >
+              <a
+                href="#how-it-works"
+                class="text-sm text-muted-foreground hover:text-foreground transition-colors"
+                >How it Works</a
+              >
+              <a
+                href="#testimonials"
+                class="text-sm text-muted-foreground hover:text-foreground transition-colors"
+                >Reviews</a
+              >
+              <a
+                href="#faq"
+                class="text-xs text-muted-foreground hover:text-foreground transition-colors"
+                >FAQ</a
+              >
+            </div>
+            ${authButtonsHtml}
+          </div>
+        `;
+
+        // Attach logout listener if user is logged in
+        if (user) {
+          document
+            .getElementById("logout-btn")
+            .addEventListener("click", async () => {
+              await signOut();
+              // After signing out, re-render the nav to show signed-out buttons
+              renderNav(null);
+            });
+        }
+      }
+
+      // Initialization: Check auth status and render the correct nav
+      document.addEventListener("DOMContentLoaded", async () => {
+        const user = await getCurrentUser();
+        renderNav(user);
+      });
+    </script>
   </body>
 </html>
