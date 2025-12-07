@@ -4,7 +4,10 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>FinexaLoans - Sign In / Sign Up</title>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script src="https://cdn.tailwindcss.com"></script>
+    <script type="module" src="./scripting.js"></script>
+
     <script>
       tailwind.config = {
         darkMode: "class",
@@ -85,6 +88,21 @@
       }
       .custom-input.input-error {
         border-color: hsl(var(--destructive)); /* border-red-500 */
+      }
+
+      /* MODERN TOAST STYLES */
+      .toast-pill {
+        background: hsl(var(--card));
+        border-radius: 12px;
+        box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.2),
+          0 4px 6px -2px rgba(0, 0, 0, 0.05);
+        color: hsl(var(--foreground));
+        transition: transform 0.3s ease-out, opacity 0.3s ease-out;
+      }
+      .icon-border {
+        border-radius: 9999px; /* rounded-full */
+        padding: 2px;
+        border: 1px solid currentColor;
       }
     </style>
   </head>
@@ -330,7 +348,13 @@
       </div>
     </div>
 
-    <script>
+    <script type="module">
+      import {
+        signIn,
+        signUpAndInsertUser,
+        getCurrentUser,
+      } from "./scripting.js";
+
       // State and Elements
       let isLogin = true;
       const initialFormState = {
@@ -359,15 +383,18 @@
       const urlParams = new URLSearchParams(window.location.search);
       const initialMode = urlParams.get("mode");
 
-      // --- Utility Functions ---
+      // --- Utility Functions (Kept local as they are UI-specific) ---
 
       function getInputValue(field) {
-        return document.getElementById(field).value.trim();
+        const el = document.getElementById(field);
+        return el ? el.value.trim() : "";
       }
 
       function updateErrorDisplay(field, message) {
         const inputEl = document.getElementById(field);
         const errorEl = document.getElementById(`error-${field}`);
+
+        if (!inputEl || !errorEl) return;
 
         if (message) {
           inputEl.classList.add("input-error");
@@ -384,28 +411,11 @@
         errors = {};
       }
 
-      function showToast(message, type = "success") {
-        const container = document.getElementById("toast-container");
-        const toast = document.createElement("div");
-
-        let colorClass = "bg-success text-white";
-        if (type === "error") colorClass = "bg-destructive text-white";
-        if (type === "warning")
-          colorClass = "bg-warning text-warning-foreground";
-
-        toast.className = `p-4 rounded-xl shadow-lg font-medium max-w-xs ${colorClass}`;
-        toast.textContent = message;
-
-        container.appendChild(toast);
-
-        setTimeout(() => {
-          toast.classList.add(
-            "transition-opacity",
-            "duration-500",
-            "opacity-0"
-          );
-          toast.addEventListener("transitionend", () => toast.remove());
-        }, 3000);
+      // Note: This is a placeholder that needs to be implemented fully
+      // or imported if the full modern toast logic is needed here too.
+      function showToast(message, type = "success", title = "Status") {
+        // Placeholder implementation for authentication UI feedback
+        alert(`${title}: ${message}`);
       }
 
       function setButtonLoading(button, isLoading, originalText) {
@@ -418,12 +428,9 @@
         button.classList.toggle("opacity-50", isLoading);
       }
 
-      // --- Validation Logic (Modeled after React Component) ---
-
+      // --- Validation Logic ---
       function validateSignup() {
         const newErrors = {};
-
-        // Sync formData with current input values
         Object.keys(formData).forEach(
           (key) => (formData[key] = getInputValue(key))
         );
@@ -461,8 +468,6 @@
 
       function validateLogin() {
         const newErrors = {};
-
-        // Sync formData for Email/Password
         formData.Email = getInputValue("Email");
         formData.Password = getInputValue("Password");
 
@@ -476,9 +481,7 @@
       }
 
       // --- Mode Management ---
-
       function syncFormInputsToState() {
-        // This updates the JS state (formData) when the user types, and clears errors
         const inputs = formEl.querySelectorAll("input");
         inputs.forEach((input) => {
           const field = input.id;
@@ -489,7 +492,7 @@
             }
           }
         });
-        errors = {}; // Clear all JS errors when any input changes
+        errors = {};
       }
 
       function renderMode() {
@@ -506,7 +509,6 @@
           switchModeButtonEl.textContent = "Already have an account? Sign in";
           signupFieldsEl.style.display = "block";
         }
-        // Clear form and errors on mode switch
         formEl.reset();
         formData = { ...initialFormState };
         clearErrors();
@@ -517,13 +519,13 @@
         renderMode();
       }
 
-      // --- Main Logic & Handlers ---
+      // --- Main Logic & Handlers (Integrated with Supabase and FIXES applied) ---
 
-      function handleSubmit(e) {
+      async function handleSubmit(e) {
         e.preventDefault();
-
         let isValid = false;
         clearErrors();
+        const originalButtonText = submitButtonEl.textContent;
 
         if (isLogin) {
           isValid = validateLogin();
@@ -532,26 +534,66 @@
         }
 
         if (isValid) {
-          setButtonLoading(submitButtonEl, true);
+          setButtonLoading(submitButtonEl, true, originalButtonText);
 
-          // Simulate API call and navigation
-          setTimeout(
-            () => {
-              setButtonLoading(submitButtonEl, false);
-              showToast(
-                isLogin ? "Welcome back!" : "Account created successfully!",
-                "success"
+          try {
+            if (isLogin) {
+              const { data, error } = await signIn(
+                formData.Email,
+                formData.Password
               );
-              localStorage.setItem("isAuthenticated", "true");
-              window.location.href = "dashboard.html";
-            },
-            isLogin ? 1000 : 1500
-          );
+
+              if (error) {
+                // Check for specific confirmation error
+                if (error.message.includes("Email not confirmed")) {
+                  showToast(
+                    "Please check your email and confirm your account before signing in.",
+                    "warning",
+                    "Account Pending"
+                  );
+                } else {
+                  showToast(`Sign in failed: ${error.message}`, "error");
+                }
+              } else if (data.user) {
+                const userName =
+                  data.user.user_metadata.first_name || formData.Email;
+                showToast(`Welcome back, ${userName}!`, "success", "Signed In");
+                window.location.href = "dashboard.html";
+              }
+            } else {
+              // Sign Up Logic
+              const { user, error } = await signUpAndInsertUser(formData);
+
+              if (error) {
+                showToast(`Signup failed: ${error.message}`, "error");
+              } else {
+                // Crucial Fix: Supabase sign-up succeeds but the user is NOT immediately logged in
+                // if email confirmation is required. We guide the user back to the login screen.
+                showToast(
+                  "Account created! Please check your email for a confirmation link.",
+                  "warning",
+                  "Confirmation Needed"
+                );
+                renderMode(); // Switch back to login view after successful signup
+              }
+            }
+          } catch (e) {
+            showToast(`An unexpected error occurred: ${e.message}`, "error");
+          } finally {
+            setButtonLoading(submitButtonEl, false, originalButtonText);
+          }
         }
       }
 
-      // --- Initialization ---
-      document.addEventListener("DOMContentLoaded", () => {
+      // --- Initialization (FIXED) ---
+      document.addEventListener("DOMContentLoaded", async () => {
+        // Check if user is already logged in before rendering the form
+        const user = await getCurrentUser();
+        if (user) {
+          window.location.href = "dashboard.html";
+          return;
+        }
+
         // Set initial mode based on URL query
         if (initialMode === "signup") {
           isLogin = false;
