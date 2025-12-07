@@ -1,9 +1,8 @@
 // --- Supabase Configuration ---
 // Your Supabase Project Details
-const SUPABASE_URL = "https://zbrdlqulzzbfdjdjarmjts.supabase.co"; // Placeholder URL
+const SUPABASE_URL = "https://zbrdlqulzzbfdjarmjts.supabase.co";
 const SUPABASE_ANON_KEY =
-  "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InpicmRscXVsenpiZmRqYXJtanRzIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjUwMjQ0NDYsImV4cCI6MjA4MDYwMDQ0Nn0.zzNMhvev-HvcatHUgAatFcUqmYCShFfO9d0m1Vg_HEE"; // Placeholder Key
-
+  "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InpicmRscXVsenpiZmRqYXJtanRzIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjUwMjQ0NDYsImV4cCI6MjA4MDYwMDQ0Nn0.zzNMhvev-HvcatHUgAatFcUqmYCShFfO9d0m1Vg_HEE";
 const { createClient } = supabase;
 export const supabaseClient = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
@@ -231,3 +230,4 @@ export const DashboardConstants = {
   ],
   calculateDueDate: calculateDueDate,
 };
+
