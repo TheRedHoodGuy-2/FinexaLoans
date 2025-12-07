@@ -1,13 +1,13 @@
 // --- Supabase Configuration ---
 // Your Supabase Project Details
-const SUPABASE_URL = "https://zbrdlqulzzbfdjarmjts.supabase.co";
+const SUPABASE_URL = "https://zbrdlqulzzbfdjdjarmjts.supabase.co"; // Placeholder URL
 const SUPABASE_ANON_KEY =
-  "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InpicmRscXVsenpiZmRqYXJtanRzIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjUwMjQ0NDYsImV4cCI6MjA4MDYwMDQ0Nn0.zzNMhvev-HvcatHUgAatFcUqmYCShFfO9d0m1Vg_HEE";
+  "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InpicmRscXVsenpiZmRqYXJtanRzIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjUwMjQ0NDYsImV4cCI6MjA4MDYwMDQ0Nn0.zzNMhvev-HvcatHUgAatFcUqmYCShFfO9d0m1Vg_HEE"; // Placeholder Key
 
 const { createClient } = supabase;
 export const supabaseClient = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
-// --- Authentication Functions ---
+// --- Authentication Functions (Rewritten) ---
 
 /**
  * Checks if a user session is active.
@@ -28,16 +28,17 @@ export async function signIn(email, password) {
 }
 
 /**
- * Handles user sign-up and inserts additional user data into the 'users' table.
+ * Handles user sign-up via Supabase Auth and inserts ALL required user data.
+ * This is the critical section for the error.
  */
 export async function signUpAndInsertUser(userData) {
-  // 1. Sign up the user via Supabase Auth
-  // If confirmation is OFF on server, this will auto-login and return a session/user object.
+  // 1. Attempt to create the user in the Supabase Auth system
   const { data: authData, error: authError } = await supabaseClient.auth.signUp(
     {
       email: userData.Email,
       password: userData.Password,
       options: {
+        // Pass basic metadata to Auth (for future use/dashboard display)
         data: {
           first_name: userData.FirstName,
           last_name: userData.LastName,
@@ -47,19 +48,15 @@ export async function signUpAndInsertUser(userData) {
   );
 
   if (authError) {
+    // If the error is 'User already registered', Supabase Auth handles it.
     return { user: null, error: authError };
   }
 
-  const userId = authData.user?.id || authData.session?.user.id;
+  const userId = authData.user.id;
 
-  if (!userId) {
-    return {
-      user: null,
-      error: new Error("Auth user ID not found after sign up/in."),
-    };
-  }
-
-  // 2. Insert detailed user data into the 'users' table
+  // 2. Insert detailed user data into the 'users' table (Profile creation)
+  // This operation requires a specific RLS policy:
+  // 'New users can insert their own profile into the users table using their auth ID.'
   const { error: userInsertError } = await supabaseClient.from("users").insert({
     user_id: userId,
     first_name: userData.FirstName,
@@ -70,19 +67,26 @@ export async function signUpAndInsertUser(userData) {
     occupation: userData.Occupation,
     address: userData.Address,
     national_id: userData.NIN,
-    // BVN is intentionally omitted from direct storage here for simulated security,
-    // though you would typically store its hash or validate it elsewhere.
+    // BVN is omitted
   });
 
   if (userInsertError) {
-    console.error("Failed to insert user details:", userInsertError);
+    console.error(
+      "CRITICAL: Failed to insert user profile. RLS Policy likely blocked the operation.",
+      userInsertError
+    );
+
+    // We return a specific error that the front-end can use to instruct the user.
+    // The Auth user is now orphaned, and the user must be instructed to sign in.
     return {
-      user: authData.user,
-      error: new Error("Account created but failed to save details."),
+      user: null,
+      error: new Error(
+        `Profile creation failed: ${userInsertError.message}. You can now try to sign in, but you may need to check your email first.`
+      ),
     };
   }
 
-  // Return the user object, which should now be logged in due to server config.
+  // 3. Success (Auth created and Profile created)
   return { user: authData.user, error: null };
 }
 
@@ -93,7 +97,7 @@ export async function signOut() {
   await supabaseClient.auth.signOut();
 }
 
-// --- Loan Data Functions ---
+// --- Loan Data Functions (Unchanged) ---
 
 /**
  * Fetches all loans for the current user, including related payments.
@@ -104,7 +108,7 @@ export async function fetchLoans() {
 
   const { data, error } = await supabaseClient
     .from("loans")
-    .select("*, payments(*)") // UPDATED: Include payments relation
+    .select("*, payments(*)")
     .eq("borrower_id", user.id)
     .order("created_at", { ascending: false });
 
@@ -192,7 +196,7 @@ export async function makePayment(loanId, paymentAmount) {
   return { success: true, newStatus: newStatus };
 }
 
-// --- Utility Functions (Kept in scripting.js for dashboard use) ---
+// --- Utility Functions (Unchanged) ---
 
 // Helper to calculate the next due date (approximate based on months)
 function calculateDueDate(startDate, durationMonths) {
