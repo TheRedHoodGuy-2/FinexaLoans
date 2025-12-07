@@ -73,25 +73,25 @@
           sans-serif;
       }
 
-      /* New style for inputs to match the desired look: white/5 background, rounded-xl, subtle border */
+      /* Input Styles */
       .custom-input {
-        background-color: rgba(255, 255, 255, 0.05); /* bg-white/5 */
-        border: 1px solid rgba(255, 255, 255, 0.1); /* border-white/10 */
-        border-radius: 0.75rem; /* rounded-xl */
-        padding: 0.75rem 1rem; /* px-4 py-3 */
+        background-color: rgba(255, 255, 255, 0.05);
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        border-radius: 0.75rem;
+        padding: 0.75rem 1rem;
         width: 100%;
         transition: border-color 150ms;
         color: hsl(var(--foreground));
       }
       .custom-input:focus {
         outline: none;
-        border-color: rgba(255, 255, 255, 0.3); /* focus:border-white/30 */
+        border-color: rgba(255, 255, 255, 0.3);
       }
       .custom-input.input-error {
-        border-color: hsl(var(--destructive)); /* border-red-500 */
+        border-color: hsl(var(--destructive));
       }
 
-      /* MODERN TOAST STYLES */
+      /* TOAST STYLES */
       .toast-pill {
         background: hsl(var(--card));
         border-radius: 12px;
@@ -101,18 +101,20 @@
         transition: transform 0.3s ease-out, opacity 0.3s ease-out;
       }
       .icon-border {
-        border-radius: 9999px; /* rounded-full */
+        border-radius: 9999px;
         padding: 2px;
         border: 1px solid currentColor;
       }
     </style>
   </head>
+
   <body class="bg-background text-foreground min-h-screen">
     <div
       id="toast-container"
       class="fixed top-4 right-4 z-[100] space-y-2"
     ></div>
 
+    <!-- Frontend Section -->
     <div
       class="min-h-screen bg-background flex items-center justify-center p-6"
     >
@@ -349,6 +351,7 @@
       </div>
     </div>
 
+    <!-- CGI Section for Auth Logic -->
     <script type="module">
       import {
         signIn,
@@ -375,7 +378,6 @@
 
       const formEl = document.getElementById("auth-form");
       const signupFieldsEl = document.getElementById("signup-fields");
-      const backButtonEl = document.getElementById("back-button");
       const switchModeButtonEl = document.getElementById("switch-mode-button");
       const submitButtonEl = document.getElementById("auth-submit-button");
       const mainTitleEl = document.getElementById("main-title");
@@ -384,50 +386,59 @@
       const urlParams = new URLSearchParams(window.location.search);
       const initialMode = urlParams.get("mode");
 
-      // --- Utility Functions (Kept local as they are UI-specific) ---
-      // Enhanced Toast Function (since the simple alert was used before)
+      // --- Utility Functions ---
+
       function showToast(message, type = "success", title = "Status") {
         const container = document.getElementById("toast-container");
         const toast = document.createElement("div");
 
-        let textClass = "text-success";
+        let textClass =
+          type === "error"
+            ? "text-destructive"
+            : type === "warning"
+            ? "text-warning"
+            : "text-success";
+        let titleText =
+          type === "error"
+            ? "Error!"
+            : type === "warning"
+            ? "Warning"
+            : "Status";
+        let iconBorderClass =
+          type === "error"
+            ? "border-destructive"
+            : type === "warning"
+            ? "border-warning"
+            : "border-success";
+
         let iconHtml =
           '<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-check"><path d="M20 6 9 17l-5-5"/></svg>';
-        let iconBorderClass = "border-success";
-
         if (type === "error") {
-          textClass = "text-destructive";
-          iconBorderClass = "border-destructive";
           iconHtml =
             '<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-x"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg>';
-          title = "Error!";
         } else if (type === "warning") {
-          textClass = "text-warning";
-          iconBorderClass = "border-warning";
           iconHtml =
             '<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-alert-triangle"><path d="m21.73 18.73-8.86-15.34a2 2 0 0 0-3.54 0l-8.86 15.34a2 2 0 0 0 1.77 3.27h17.72a2 2 0 0 0 1.77-3.27Z"/><path d="M12 9v4"/><path d="M12 17h.01"/></svg>';
-          title = "Warning";
         }
 
         toast.className = "p-3 w-80 toast-pill animate-fade-in";
 
         toast.innerHTML = `
-                <div class="flex items-start gap-3">
-                    <div class="icon-border ${iconBorderClass} ${textClass}">
-                        ${iconHtml}
-                    </div>
-                    <div class="flex-1 space-y-0.5">
-                        <p class="font-semibold text-sm">${title}</p>
-                        <p class="text-muted-foreground text-sm">${message}</p>
-                    </div>
-                    <button onclick="this.closest('.toast-pill').remove()" class="text-muted-foreground hover:text-foreground">
-                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-x"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg>
-                    </button>
-                </div>
-            `;
+          <div class="flex items-start gap-3">
+              <div class="icon-border ${iconBorderClass} ${textClass}">
+                  ${iconHtml}
+              </div>
+              <div class="flex-1 space-y-0.5">
+                  <p class="font-semibold text-sm">${titleText}</p>
+                  <p class="text-muted-foreground text-sm">${message}</p>
+              </div>
+              <button onclick="this.closest('.toast-pill').remove()" class="text-muted-foreground hover:text-foreground">
+                  <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-x"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg>
+              </button>
+          </div>
+        `;
 
         container.appendChild(toast);
-
         setTimeout(() => {
           toast.classList.remove("animate-fade-in");
           toast.classList.add("opacity-0", "translate-y-2");
@@ -474,36 +485,36 @@
       }
 
       // --- Validation Logic ---
-      function validateSignup() {
+
+      function validateForm(mode) {
         const newErrors = {};
         Object.keys(formData).forEach(
           (key) => (formData[key] = getInputValue(key))
         );
 
-        if (!formData.FirstName) newErrors.FirstName = "First name is required";
-        if (!formData.LastName) newErrors.LastName = "Last name is required";
-        if (!formData.Email) {
-          newErrors.Email = "Email is required";
-        } else if (!/\S+@\S+\.\S+/.test(formData.Email)) {
-          newErrors.Email = "Email is invalid";
+        // Required for both modes
+        if (!formData.Email || !/\S+@\S+\.\S+/.test(formData.Email)) {
+          newErrors.Email = "A valid email is required";
         }
-        if (!formData.DateOfBirth)
-          newErrors.DateOfBirth = "Date of birth is required";
-        if (!formData.PhoneNumber)
-          newErrors.PhoneNumber = "Phone number is required";
-        if (!formData.Occupation)
-          newErrors.Occupation = "Occupation is required";
-        if (!formData.Address) newErrors.Address = "Address is required";
-        if (!formData.NIN || formData.NIN.length !== 11)
-          newErrors.NIN = "NIN must be 11 digits";
-        // NOTE: BVN is not strictly required for account creation, but we enforce 11 digits if provided
-        if (formData.BVN && formData.BVN.length !== 11)
-          newErrors.BVN = "BVN must be 11 digits or empty";
-
-        if (!formData.Password) {
-          newErrors.Password = "Password is required";
-        } else if (formData.Password.length < 8) {
+        if (!formData.Password || formData.Password.length < 8) {
           newErrors.Password = "Password must be at least 8 characters";
+        }
+
+        // Required only for signup
+        if (mode === "signup") {
+          if (!formData.FirstName) newErrors.FirstName = "First name required";
+          if (!formData.LastName) newErrors.LastName = "Last name required";
+          if (!formData.DateOfBirth)
+            newErrors.DateOfBirth = "Date of birth required";
+          if (!formData.PhoneNumber)
+            newErrors.PhoneNumber = "Phone number required";
+          if (!formData.NIN || formData.NIN.length !== 11)
+            newErrors.NIN = "NIN must be 11 digits";
+          if (!formData.Address) newErrors.Address = "Address is required";
+          if (!formData.Occupation)
+            newErrors.Occupation = "Occupation is required";
+          if (formData.BVN && formData.BVN.length !== 11)
+            newErrors.BVN = "BVN must be 11 digits or empty";
         }
 
         errors = newErrors;
@@ -513,21 +524,8 @@
         return Object.keys(errors).length === 0;
       }
 
-      function validateLogin() {
-        const newErrors = {};
-        formData.Email = getInputValue("Email");
-        formData.Password = getInputValue("Password");
-
-        if (!formData.Email) newErrors.Email = "Email is required";
-        if (!formData.Password) newErrors.Password = "Password is required";
-
-        errors = newErrors;
-        updateErrorDisplay("Email", errors.Email);
-        updateErrorDisplay("Password", errors.Password);
-        return Object.keys(errors).length === 0;
-      }
-
       // --- Mode Management ---
+
       function syncFormInputsToState() {
         const inputs = formEl.querySelectorAll("input");
         inputs.forEach((input) => {
@@ -566,98 +564,77 @@
 
       async function handleSubmit(e) {
         e.preventDefault();
-        let isValid = false;
-        clearErrors();
+        const mode = isLogin ? "signin" : "signup";
         const originalButtonText = submitButtonEl.textContent;
 
-        if (isLogin) {
-          isValid = validateLogin();
-        } else {
-          isValid = validateSignup();
-        }
+        if (!validateForm(mode)) return;
 
-        if (isValid) {
-          setButtonLoading(submitButtonEl, true, originalButtonText);
+        setButtonLoading(submitButtonEl, true, originalButtonText);
 
-          try {
-            if (isLogin) {
-              const { data, error } = await signIn(
-                formData.Email,
-                formData.Password
-              );
+        try {
+          if (isLogin) {
+            const { data, error } = await signIn(
+              formData.Email,
+              formData.Password
+            );
 
-              if (error) {
-                if (error.message.includes("Email not confirmed")) {
-                  showToast(
-                    "Please check your email and confirm your account before signing in.",
-                    "warning",
-                    "Account Pending"
-                  );
-                } else {
-                  showToast(`Sign in failed: ${error.message}`, "error");
-                }
-              } else if (data.user) {
-                const userName =
-                  data.user.user_metadata.first_name || formData.Email;
-                showToast(`Welcome back, ${userName}!`, "success", "Signed In");
-                window.location.href = "dashboard.html";
+            if (error) {
+              const msg = error.message.includes("Email not confirmed")
+                ? "Please check your email and confirm your account."
+                : "Invalid credentials or user not found.";
+              showToast(msg, "error");
+            } else if (data.user) {
+              const userName =
+                data.user.user_metadata?.first_name || formData.Email;
+              showToast(`Welcome back, ${userName}!`, "success", "Signed In");
+              window.location.href = "dashboard.html";
+            }
+          } else {
+            // Sign Up Logic
+            const { error } = await signUpAndInsertUser(formData);
+
+            if (error) {
+              if (
+                error.message.includes("User already registered") ||
+                error.message.includes("Profile creation failed")
+              ) {
+                // This covers both the Auth error and the critical RLS/Profile insertion error.
+                showToast(
+                  "Account created, but verification or profile save failed. Please check your email and then sign in.",
+                  "warning",
+                  "Action Required"
+                );
+                isLogin = true;
+                renderMode(); // Guide user to sign in
+              } else {
+                showToast(`Signup failed: ${error.message}`, "error");
               }
             } else {
-              // Sign Up Logic
-              const { user, error } = await signUpAndInsertUser(formData);
-
-              if (error) {
-                // Supabase Auth provides detailed errors
-                if (error.message.includes("User already registered")) {
-                  showToast(
-                    "This email is already registered. Please sign in to your account.",
-                    "warning",
-                    "Already Registered"
-                  );
-                  // Switch to login mode to guide the user to the correct action
-                  isLogin = true;
-                  renderMode();
-                } else if (error.message.includes("Profile creation failed")) {
-                  // Handle the scenario where Auth succeeded but the profile insertion (DB) failed.
-                  showToast(
-                    "Account created (Auth), but profile saving failed. Please sign in and check your dashboard.",
-                    "error",
-                    "DB Error"
-                  );
-                  isLogin = true;
-                  renderMode();
-                } else {
-                  // General failure
-                  showToast(`Signup failed: ${error.message}`, "error");
-                }
-              } else {
-                // Successful Auth signup, now switch to login for confirmation
-                showToast(
-                  "Account created! Please check your email for a confirmation link.",
-                  "warning",
-                  "Confirmation Needed"
-                );
-                renderMode(); // Switch back to login view after successful signup
-              }
+              // Successful Auth & Profile insertion
+              showToast(
+                "Account created! Please check your email for a confirmation link.",
+                "success",
+                "Success"
+              );
+              isLogin = true;
+              renderMode();
             }
-          } catch (e) {
-            showToast(`An unexpected error occurred: ${e.message}`, "error");
-          } finally {
-            setButtonLoading(submitButtonEl, false, originalButtonText);
           }
+        } catch (e) {
+          showToast(`An unexpected error occurred: ${e.message}`, "error");
+        } finally {
+          setButtonLoading(submitButtonEl, false, originalButtonText);
         }
       }
 
       // --- Initialization ---
       document.addEventListener("DOMContentLoaded", async () => {
-        // Check if user is already logged in before rendering the form
         const user = await getCurrentUser();
         if (user) {
           window.location.href = "dashboard.html";
           return;
         }
 
-        // Set initial mode based on URL query
         if (initialMode === "signup") {
           isLogin = false;
         }
@@ -667,7 +644,7 @@
         formEl.addEventListener("submit", handleSubmit);
         formEl.addEventListener("input", syncFormInputsToState);
         switchModeButtonEl.addEventListener("click", switchMode);
-        backButtonEl.addEventListener("click", () => {
+        document.getElementById("back-button").addEventListener("click", () => {
           window.location.href = "index.html";
         });
       });
