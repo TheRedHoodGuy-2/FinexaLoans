@@ -1,10 +1,9 @@
 # 🚀 FinexaLoans Loan Management System: Comprehensive Technical Blueprint
 
-## 1. Introduction: Babcock Cleaning Booking System - Group 5
+## 1. FinexaLoans Loan Management System - Group 10
+This document serves as the **Technical Documentation and System Architecture** for the **FinexaLoans Loan Management System**. It was developed by **Group 10**.
 
-This document serves as the **Technical Documentation and System Architecture** for the **Babcock Cleaning Booking System**. It was developed by **Group 5**.
-
-[cite_start]The system's **Purpose** is to capture cleaning service booking estimates from the public landing page, validate and persist submissions to MySQL, and return a success or error HTML page to the user[cite: 12, 13]. [cite_start]The core architecture follows a standard **Input-Process-Output model** involving a decoupled frontend and a CGI-based backend[cite: 14].
+The system utilizes a **Client-Serverless** architecture, relying on client-side JavaScript for logic and **Supabase (PostgreSQL)** as its Backend-as-a-Service (BaaS).
 
 
 
