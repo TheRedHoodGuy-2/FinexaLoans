@@ -21,25 +21,25 @@ The system utilizes a **Client-Serverless** architecture, relying on client-side
 | | ONYEODIZIELU UGOCHUKWU M. | 22/1161 |
 | | VICTOR DAKOH IKPEMINOGHENA | 22/2957 |
 | | YISA MORDECAI | 22/1890 |
-| | Ene-Dede Precious Deinma | [cite_start]22/2420 [cite: 6] |
-| | Okafor Ebubechukwu Samuel | [cite_start]22/2332 [cite: 6] |
-| | Nyuiring-Yohrhagninyui | [cite_start]21/3135 [cite: 6] |
-| | Odedele Segun | [cite_start]21/1850 [cite: 6] |
-| | Obisanya Dominion | [cite_start]22/1822 [cite: 6] |
-| | Epebinu Ayomipo Daniel | [cite_start]22/2423 [cite: 6] |
-| | Agi Vine Ozioma | [cite_start]22/3087 [cite: 6] |
-| | Ifunanya Osonwa | [cite_start]22/2911 [cite: 6] |
-| | Ogiye Jennifer | [cite_start]22/2585 [cite: 6] |
-| | Oranika John | [cite_start]22/2994 [cite: 6] |
-| **Database Design** | Olugbeje Boluwatife Modupe | [cite_start]22/2408 [cite: 8] |
-| | Chigbo Chidubem | [cite_start]17/1740 [cite: 8] |
-| | Solomon Chukwuemeka Marvelous | [cite_start]22/1889 [cite: 8] |
-| | Olukoya Ayoola | [cite_start]20/0096 [cite: 8] |
-| | Towolawi Omotola Faith | [cite_start]22/1695 [cite: 8] |
-| | Udotong Jeremiah William | [cite_start]22/0843 [cite: 8] |
-| | Abiola Oluwasemilore Esther | [cite_start]23/1489 [cite: 8] |
-| | Ororho Uruemesiri David | [cite_start]23/2546 [cite: 8] |
-| | Soji-Oni Ayomide Testimony | [cite_start]22/1054 [cite: 8] |
+| | Ene-Dede Precious Deinma | 22/2420 |
+| | Okafor Ebubechukwu Samuel | 22/2332 |
+| | Nyuiring-Yohrhagninyui | 21/3135 |
+| | Odedele Segun | 21/1850 |
+| | Obisanya Dominion | 22/1822 |
+| | Epebinu Ayomipo Daniel | 22/2423 |
+| | Agi Vine Ozioma | 22/3087 |
+| | Ifunanya Osonwa | 22/2911 |
+| | Ogiye Jennifer | 22/2585 |
+| | Oranika John | 22/2994 |
+| **Database Design** | Olugbeje Boluwatife Modupe | 22/2408 |
+| | Chigbo Chidubem | 17/1740 |
+| | Solomon Chukwuemeka Marvelous | 22/1889 |
+| | Olukoya Ayoola | 20/0096 |
+| | Towolawi Omotola Faith | 22/1695 |
+| | Udotong Jeremiah William | 22/0843 |
+| | Abiola Oluwasemilore Esther | 23/1489 |
+| | Ororho Uruemesiri David | 23/2546 |
+| | Soji-Oni Ayomide Testimony | 22/1054 |
 | | Obih Joan Chidinma | 22/2610 |
 | | Enakirerhi Julian | 23/1909 |
 | | Obika Martins Akachukwu | 22/1248 |
@@ -48,14 +48,14 @@ The system utilizes a **Client-Serverless** architecture, relying on client-side
 | | Vwarak Bliss-David | 22/3007 |
 | | Olubiyi Oluwatise Ikhafoghwe | 22/1148 |
 | | Onwusah Dorachima Ifeanyi | 23/0984 |
-| **CGI Scripting** | Ibironke Victor Damilola | [cite_start]23/1084 [cite: 10] |
-| | Onasanya Grace | [cite_start]22/2763 [cite: 10] |
-| | Olatunji Oluwafemi Temitope | [cite_start]22/0566 [cite: 10] |
-| | Itamah Osedebame Ehigie | [cite_start]23/1860 [cite: 10] |
-| | Nwosu Jason | [cite_start]22/0927 [cite: 11] |
-| | Olungwe Christian | [cite_start]22/0633 [cite: 11] |
-| | Nathaniel Abraham Owoidighe | [cite_start]22/1915 [cite: 11] |
-| | Madagwa Success | [cite_start]22/2386 [cite: 11] |
+| **CGI Scripting** | Ibironke Victor Damilola | 23/1084 |
+| | Onasanya Grace | 22/2763 |
+| | Olatunji Oluwafemi Temitope | 22/0566 |
+| | Itamah Osedebame Ehigie | 23/1860 |
+| | Nwosu Jason | 22/0927 |
+| | Olungwe Christian | 22/0633 |
+| | Nathaniel Abraham Owoidighe | 22/1915 |
+| | Madagwa Success | 22/2386 |
 | | Pinwa Joshua Nwibari | 22/1290 |
 | | Oluwafemi Oluwasemilore Esther | 22/1399 |
 | | Onyenweaku Chibundu Emmanuel | 21/1872 |
